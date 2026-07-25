@@ -10,13 +10,13 @@ import { EblockiLogo } from "./EblockiLogo";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 
 const NAV = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/start-today", label: "Start Today", icon: Sparkles },
-  { to: "/proof", label: "Proof", icon: Gavel },
-  { to: "/systems", label: "Systems", icon: Hammer },
-  { to: "/coach", label: "Coach", icon: MessageSquare },
-  { to: "/gameforge", label: "GameForge", icon: Swords },
-  { to: "/operator", label: "Operator", icon: Hexagon },
+  { to: "/dashboard", label: "Today", icon: LayoutDashboard },
+  { to: "/proof", label: "Log Action", icon: Gavel },
+  { to: "/start-today", label: "Quests", icon: Sparkles },
+  { to: "/coach", label: "Game Master", icon: MessageSquare },
+  { to: "/gameforge", label: "Arena", icon: Swords },
+  { to: "/operator", label: "Character", icon: Hexagon },
+  { to: "/systems", label: "Intel", icon: Hammer },
   { to: "/settings", label: "Settings", icon: Settings },
 ];
 

@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { normaliseModeKey, pickTemplatesForMode } from "@/lib/eblocki/mode-templates";
 import { logEvent } from "@/lib/eblocki/analytics";
+import { assertObjectiveCanComplete } from "@/lib/eblocki/life-game";
 
 export type ObjectiveKind = "mission" | "streak_save" | "recovery" | "boss" | "quick_win";
 export type ObjectiveStatus = "pending" | "active" | "completed" | "skipped" | "failed";
@@ -227,6 +228,9 @@ export function useDailyObjectives() {
       id: string,
       reflection?: { proof: string; hard: string | null; upgrade: string | null; qualityRating?: number | null },
     ) => {
+      const objective = objectives.find((row) => row.id === id);
+      if (!objective) throw new Error("Objective not found.");
+      assertObjectiveCanComplete(objective);
       // Optimistic update — UI feels instant, refresh syncs truth.
       setObjectives((prev) =>
         prev.map((o) =>
@@ -260,7 +264,7 @@ export function useDailyObjectives() {
       void logEvent("objective_completed", { kind: "mission" });
       await refresh();
     },
-    [refresh],
+    [objectives, refresh],
   );
 
   const skip = useCallback(
