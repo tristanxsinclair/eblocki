@@ -4,8 +4,8 @@
 - Master plan: `Eblocki Elite Product Standard Complete` (uploaded 2026-07-10)
 - Stack: React 18 + Vite + TS + React Router + Tailwind/shadcn + Supabase + PostHog + Capacitor + Stripe
 - Current active phase: **Phase 1 — Trust and release blockers**
-- Current release gate: WP-004 (P1-ACCOUNT-DELETE) code/test/build complete; live Stripe cancellation end-to-end remains an external-verification gate (`WP-004-EXTERNAL`)
-- Ledger last updated: 2026-07-12
+- Current release gate: WP-005A (P1-PAY-ENV) code/test/build complete; Stripe/Supabase dashboard and safe payment-flow verification remain external-access gates
+- Ledger last updated: 2026-07-29
 
 ## Reconciliation closeout (2026-07-12)
 
@@ -19,7 +19,7 @@
   - force-push blocked, branch deletion blocked, admins enforced
   - deployment policy: Pages + Datadog remain post-merge/post-deploy release signals
 - WP split enforced:
-  - `WP-005A / P1-PAY-ENV` = READY / EXECUTABLE (no pricing/term changes)
+  - `WP-005A / P1-PAY-ENV` = PARTIALLY COMPLETE — code/test/build verified; external dashboard/payment-flow evidence still required (no pricing/term changes)
   - `WP-005B / P1-PRICING-SOT` = BLOCKED — MANUAL COMMERCIAL DECISION REQUIRED (Tristan-owned decisions)
 
 ## E2E Test Infrastructure (WP-003 supporting)
@@ -82,8 +82,8 @@ audit completion.
 | P0-CONFINE-AI-EXPORT | 0 | P0 | Strip `model`/`vector_store_id` from export-data archive | `supabase/functions/export-data` | BLOCKED — EXTERNAL ACCESS REQUIRED | Deploy function and inspect one real export archive |
 | P0-CONFINE-AI-BUNDLE-SCAN | 0 | P0 | Search built client bundle for `vs_`, model IDs | build output | VERIFIED COMPLETE (WP-002) | — |
 | WP-005B / P1-PRICING-SOT | 1 | P0 | Pricing source of truth (Stripe + display) | `src/lib/stripe.ts`, Pricing, UpgradeCard | BLOCKED — MANUAL COMMERCIAL DECISION REQUIRED | Await Tristan decisions: Pro monthly, Pro annual, annual discount, Founder price/model, lifetime wording, refund wording |
-| WP-005A / P1-PAY-ENV | 1 | P0 | Payment env verification (sandbox vs live surfacing + routing) | `PaymentTestModeBanner`, `stripe.ts`, `create-checkout`, `payments-webhook`, `create-portal-session`, `useSubscription` | READY / EXECUTABLE | Verify banner/env partitioning and checkout mismatch rejection without changing prices/terms |
-| WP-IMPROVEMENT-LOOP-01 | Draft | P2 | Verdict, Gap, and Correction Surface v1 | Proof result surface | PARTIALLY COMPLETE — code/test/build complete, browser QA blocked | Draft PR only; do not merge before WP-005A release gate or without authenticated proof-result browser evidence |
+| WP-005A / P1-PAY-ENV | 1 | P0 | Payment env verification (sandbox vs live surfacing + routing) | `PaymentTestModeBanner`, `stripe.ts`, `create-checkout`, `payments-webhook`, `create-portal-session`, `useSubscription` | PARTIALLY COMPLETE — CODE/TEST/BUILD VERIFIED; EXTERNAL ACCESS REQUIRED | Deploy/configure function secrets; verify Stripe dashboard mode, sandbox checkout, webhook, portal, and entitlement writes |
+| WP-IMPROVEMENT-LOOP-01 | Draft | P2 | Verdict, Gap, and Correction Surface v1 | Proof result surface | PARTIALLY COMPLETE — code/test/build complete, browser QA blocked | Already present on `main`; complete authenticated proof-result browser evidence before claiming release verification |
 | P1-VERDICT-COPY | 1 | P0 | Remove duplicated / false verdict copy | Verdict surfaces | VERIFIED COMPLETE (2026-07-11) | — |
 | P1-BILLING-PORTAL | 1 | P1 | Billing portal reachable from Settings | `BillingCard`, `create-portal-session` | VERIFIED COMPLETE (prior turn) | — |
 | P1-ACCOUNT-EXPORT | 1 | P1 | Account data export | `export-data` | VERIFIED COMPLETE after WP-001 | — |
@@ -113,10 +113,13 @@ audit completion.
    prices, Founder terms, and refund rules.
 4. WP-004 shipped 2026-07-12 (see the WP-004 evidence section below).
    Next executable strict WP is **WP-005A / P1-PAY-ENV VERIFICATION**.
-5. WP-IMPROVEMENT-LOOP-01 was implemented as an out-of-sequence draft
-   product-refinement slice. It must not merge ahead of WP-005A unless Tristan
-   explicitly changes release order. Browser proof-result QA remains blocked
-   because no authenticated E2E credentials or local session are available.
+5. WP-005A code/test/build verification completed 2026-07-13 on
+   `codex/wp-005a-pay-env-verification`. External Stripe/Supabase dashboard,
+   sandbox checkout, webhook, portal, and entitlement-write verification remain
+   blocked on deployment access.
+6. WP-IMPROVEMENT-LOOP-01 is already present on `main` as an out-of-sequence
+   product-refinement slice. Browser proof-result QA remains blocked because no
+   authenticated E2E credentials or local session were available.
 
 ## WP-IMPROVEMENT-LOOP-01 evidence (Verdict, Gap, and Correction Surface v1)
 Date: 2026-07-13.
@@ -240,14 +243,69 @@ Browser evidence:
 Status:
 - **PARTIALLY COMPLETE** — code/test/build/scans complete; authenticated browser
   proof-submission/result QA blocked.
-- Draft PR required. Merge blocked by WP-005A release gate and by missing
-  proof-result browser evidence unless Tristan explicitly approves a partially
-  verified PR.
+- The implementation is present on `main`, but authenticated proof-result
+  browser evidence remains required before release verification can be claimed.
 
 Rollback:
 - Revert `src/lib/eblocki/user-facing-copy.ts`,
   `src/pages/Proof.tsx`, `src/lib/eblocki/__tests__/user-facing-copy.test.ts`,
   and this release-documentation update. No data rollback required.
+
+## WP-005A evidence (P1-PAY-ENV)
+Date: 2026-07-13.
+
+Objective:
+- Prevent sandbox/test and live Stripe resources from being crossed accidentally.
+- Make checkout, webhook, portal, return-page, and entitlement surfaces agree
+  on the intended payment environment.
+- Keep pricing, Founder terms, refunds, schema, and product modules unchanged.
+
+Implementation:
+- Added the shared `supabase/functions/_shared/stripe-config.ts` guard for
+  explicit deployment environment, allowed return origins, known lookup keys,
+  key-prefix mismatch detection, Stripe `livemode`, and redacted errors.
+- Checkout, portal, and webhook functions now fail closed on environment,
+  origin, lookup-key, and Stripe resource-mode mismatches.
+- Checkout return remains non-authoritative and displays only a redacted
+  reference.
+- `PaymentTestModeBanner` and `src/lib/stripe.ts` share the same client-side
+  publishable-token interpretation.
+
+Acceptance evidence:
+- `git diff --check` -> PASS.
+- `npx tsc --noEmit` -> PASS.
+- Stripe-environment tests -> PASS, 12 tests.
+- Reconciled full test suite -> PASS, 40 files and 330 tests.
+- Vite build -> PASS.
+- Repo lint -> PASS, 0 errors and 14 pre-existing warnings.
+- Bundle, client-secret, source-secret, and privileged `VITE_` scans found no
+  disallowed matches.
+- CI audit reconciliation (2026-07-29):
+  - `npm audit fix` without `--force` updated safe transitive lockfile versions,
+    including DOMPurify and PostCSS.
+  - `npm audit --omit=dev --audit-level=moderate` now reports only two moderate
+    React Router advisories whose available fix is the breaking v7 migration.
+  - CI continues to block high-severity production findings; the React Router
+    migration remains an explicit compatibility risk, not a forced merge-time
+    upgrade.
+- Pricing browser QA passed at 390 px and 1280 px with the test-mode banner,
+  working yearly toggle, and no horizontal overflow.
+- Screenshots:
+  - `docs/release/evidence/wp-005a/pricing-payment-env-390.png`
+  - `docs/release/evidence/wp-005a/pricing-payment-env-1280.png`
+
+External verification still required:
+1. Verify Supabase function secrets and Stripe sandbox/live dashboard resources.
+2. Execute a sandbox checkout and confirm the matching subscription write.
+3. Replay a webhook and verify idempotent handling.
+4. Verify failed checkout creates no entitlement.
+5. Verify the portal opens the matching sandbox customer.
+6. Verify production live configuration before enabling live checkout.
+
+Status:
+- **PARTIALLY COMPLETE — CODE/TEST/BUILD VERIFIED; EXTERNAL ACCESS REQUIRED.**
+- Do not mark WP-005A VERIFIED COMPLETE until dashboard and safe payment-flow
+  evidence is recorded.
 
 ## WP-004 evidence (P1-ACCOUNT-DELETE)
 Date: 2026-07-12.
