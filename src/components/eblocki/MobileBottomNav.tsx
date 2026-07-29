@@ -19,17 +19,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { haptics } from "@/hooks/useHaptics";
 
 const PRIMARY = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/proof", label: "Proof", icon: Gavel },
-  { to: "/coach", label: "Coach", icon: MessageSquare },
+  { to: "/dashboard", label: "Today", icon: LayoutDashboard },
+  { to: "/proof", label: "Log", icon: Gavel },
+  { to: "/coach", label: "GM", icon: MessageSquare },
 ] as const;
 
 const SECONDARY = [
-  { to: "/operator", label: "Operator", icon: Hexagon },
-  { to: "/gameforge", label: "GameForge", icon: Swords },
-  { to: "/systems", label: "Systems", icon: Hammer },
+  { to: "/operator", label: "Character", icon: Hexagon },
+  { to: "/gameforge", label: "Arena", icon: Swords },
+  { to: "/start-today", label: "Quests", icon: Sparkles },
+  { to: "/systems", label: "Intel", icon: Hammer },
   { to: "/modes", label: "Areas", icon: Layers },
-  { to: "/start-today", label: "Start Today", icon: Sparkles },
   { to: "/settings", label: "Settings", icon: Settings },
 ] as const;
 

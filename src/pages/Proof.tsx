@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -34,6 +34,7 @@ import {
   ScanLine,
   UploadCloud,
   X,
+  Zap,
 } from "lucide-react";
 import { Seo } from "@/components/Seo";
 import { summariseArtifactContent } from "@/lib/eblocki/mobile-disclosure";
@@ -57,6 +58,10 @@ import {
 import { parseTemporalProofParams } from "@/lib/eblocki/temporal-proof-link";
 import { verdictIdentityImpact } from "@/lib/eblocki/verdict-identity-impact";
 import { MotionVerdictCard } from "@/components/eblocki/motion";
+import {
+  buildLifeGameSettlementHref,
+  isSafeLifeGameRecordId,
+} from "@/lib/eblocki/life-game";
 
 const ARTIFACT_TYPES = [
   "product system review",
@@ -88,6 +93,7 @@ interface Verdict {
   eliteVersion: string;
   artifactId: string;
   contractClosed: boolean;
+  questSyncPending: boolean;
   selectedStandard: string;
   requiredEvidence: string[];
   contractAlignment: string;
@@ -99,6 +105,7 @@ interface Verdict {
 
 type ProofCommitmentRow = Tables<"proof_commitments">;
 type ProofArtifactRow = Tables<"proof_artifacts">;
+type DailyObjectiveRow = Tables<"daily_objectives">;
 
 interface OcrExtractResponse {
   error?: string;
@@ -110,6 +117,9 @@ interface OcrExtractResponse {
 const ACCEPTED_TYPES = "application/pdf,image/png,image/jpeg,image/webp,image/gif,text/plain,text/markdown,text/csv";
 const MAX_ATTACHMENT_BYTES = 10 * 1024 * 1024; // 10MB
 const ACCEPTED_MIME_LIST = ACCEPTED_TYPES.split(",");
+function trustedRecordHint(value: string | null): string | null {
+  return isSafeLifeGameRecordId(value) ? value : null;
+}
 
 type AttachStatus = "idle" | "validating" | "reading" | "extracting" | "ready" | "failed";
 
@@ -247,11 +257,14 @@ export default function Proof() {
   const firstProofMode = isFirstProofMode(params);
   const uglyStartMode = isUglyStartMode(params);
   const temporalBrief = useMemo(() => parseTemporalProofParams(params), [params]);
+  const questSource = params.get("source") === "quest";
+  const objectiveIdHint = trustedRecordHint(params.get("objective"));
   const [firstProofSubmitted, setFirstProofSubmitted] = useState(false);
 
   const [pending, setPending] = useState<ProofCommitmentRow[]>([]);
   const [completed, setCompleted] = useState<ProofArtifactRow[]>([]);
   const [missed, setMissed] = useState<ProofCommitmentRow[]>([]);
+  const [linkedObjective, setLinkedObjective] = useState<DailyObjectiveRow | null>(null);
   const [userModes, setUserModes] = useState<UserMode[]>([]);
 
   const [selectedModeId, setSelectedModeId] = useState<string>("");
@@ -294,22 +307,32 @@ export default function Proof() {
     });
   }, [firstProofMode]);
 
-  const reload = async () => {
+  const reload = useCallback(async () => {
     if (!user) return;
-    const [{ data: pc }, { data: pa }, { data: modes }] = await Promise.all([
+    const objectiveRequest = objectiveIdHint
+      ? supabase
+          .from("daily_objectives")
+          .select("*")
+          .eq("id", objectiveIdHint)
+          .eq("user_id", user.id)
+          .maybeSingle()
+      : Promise.resolve({ data: null, error: null });
+    const [{ data: pc }, { data: pa }, { data: modes }, { data: objective }] = await Promise.all([
       supabase.from("proof_commitments").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("proof_artifacts").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
       supabase.from("user_modes").select("*").eq("user_id", user.id).order("created_at", { ascending: false }),
+      objectiveRequest,
     ]);
     setPending((pc ?? []).filter((p) => p.status === "pending"));
     setMissed((pc ?? []).filter((p) => p.status === "missed"));
     setCompleted(pa ?? []);
     setUserModes((modes ?? []) as unknown as UserMode[]);
-  };
+    setLinkedObjective((objective as DailyObjectiveRow | null) ?? null);
+  }, [objectiveIdHint, user]);
 
   useEffect(() => {
-    reload();
-  }, [user]);
+    void reload();
+  }, [reload]);
 
   useEffect(() => {
     if (!verdict) return;
@@ -325,13 +348,23 @@ export default function Proof() {
     resultRef.current?.focus();
   }, [verdict, submitting]);
 
-  // Honour ?mode=... and ?contract=... deep links
+  // URL IDs are hints only. Contract selection resolves against the user's
+  // fetched pending rows; objective ownership is checked explicitly in reload.
   useEffect(() => {
     const m = params.get("mode");
     if (m) setSelectedModeId(m.toUpperCase());
-    const c = params.get("contract");
+    const c = trustedRecordHint(params.get("contract"));
     if (c) setLinkedContractId(c);
   }, [params]);
+
+  useEffect(() => {
+    if (!linkedObjective) return;
+    if (!title) setTitle(linkedObjective.title);
+    if (!selectedModeId && linkedObjective.mode_id) setSelectedModeId(linkedObjective.mode_id);
+    if (linkedObjective.proof_commitment_id) {
+      setLinkedContractId(linkedObjective.proof_commitment_id);
+    }
+  }, [linkedObjective, selectedModeId, title]);
 
   // Honour ?source=temporal&domain=... — only preselect the domain when it
   // safely matches an active user mode AND the user has not already chosen
@@ -371,7 +404,7 @@ export default function Proof() {
     if (linkedContract.required_artifact && !artifactType) {
       setArtifactType(linkedContract.required_artifact.length > 80 ? "other" : linkedContract.required_artifact);
     }
-  }, [linkedContract]);
+  }, [artifactType, linkedContract, selectedModeId, title]);
 
   const proofPreview = useMemo(() => buildProofStandardPreview({
     domain: selectedMode?.mode_id ?? linkedContract?.domain ?? selectedModeId,
@@ -566,6 +599,7 @@ export default function Proof() {
       }
 
       let contractClosed = false;
+      let questSyncPending = false;
       if (linkedContract && !linkedContract.proof_artifact_id) {
         const { error: upErr } = await supabase
           .from("proof_commitments")
@@ -576,8 +610,27 @@ export default function Proof() {
             completion_reflection: reflection.trim() || null,
           })
           .eq("id", linkedContract.id)
+          .eq("user_id", user.id)
           .is("proof_artifact_id", null);
         if (!upErr) contractClosed = true;
+        else questSyncPending = true;
+      }
+
+      if (linkedObjective) {
+        const completedAt = new Date().toISOString();
+        const { data: syncedObjective, error: objectiveError } = await supabase
+          .from("daily_objectives")
+          .update({
+            status: "completed",
+            proof_artifact_id: artifact!.id,
+            completed_at: completedAt,
+          })
+          .eq("id", linkedObjective.id)
+          .eq("user_id", user.id)
+          .in("status", ["pending", "active"])
+          .select("id")
+          .maybeSingle();
+        if (objectiveError || !syncedObjective) questSyncPending = true;
       }
 
       const extras = buildVerdictExtras(submissionPreview, score);
@@ -603,6 +656,7 @@ export default function Proof() {
         eliteVersion: extras.eliteVersion,
         artifactId: artifact!.id,
         contractClosed,
+        questSyncPending,
         selectedStandard: submissionPreview.standardLabel,
         requiredEvidence: submissionPreview.requiredEvidence,
         contractAlignment: submissionPreview.alignmentMessage,
@@ -630,7 +684,19 @@ export default function Proof() {
           : null,
       );
 
-      toast.success("Proof submitted. Review the result below.");
+      if (questSyncPending) {
+        toast.warning("Action logged // quest sync pending", {
+          description: "Your evidence is safe. Eblocki will retry the quest link from the HUD.",
+        });
+      } else {
+        toast.success(questSource ? "Action filed. Review the verdict below." : "Proof submitted. Review the result below.");
+      }
+      void logEvent("life_game_action_filed", {
+        route: "/proof",
+        source: questSource ? "quest" : "proof",
+        evidenceStrength: score.evidenceStrength,
+        syncState: questSyncPending ? "pending" : "complete",
+      });
       if (firstProofMode) {
         setFirstProofSubmitted(true);
         void logEvent("proof_capture_completed", { route: "/proof", source: "first_proof" });
@@ -815,8 +881,10 @@ export default function Proof() {
   return (
     <AppShell>
       <Seo
-        title="Proof Check | EBLOCKI"
-        description="Submit proof artifacts, score evidence strength, and close pending Proof Contracts."
+        title={questSource ? "Log Action | EBLOCKI" : "Proof Check | EBLOCKI"}
+        description={questSource
+          ? "File a real action, attach evidence, and receive an authoritative verdict."
+          : "Submit proof artifacts, score evidence strength, and close pending Proof Contracts."}
         path="/proof"
       />
       <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 min-w-0 max-w-full text-wrap-safe">
@@ -834,10 +902,16 @@ export default function Proof() {
           </header>
         ) : (
           <header className="min-w-0">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Proof Check</span>
-            <h1 className="text-2xl md:text-3xl font-semibold mt-1 break-words">Submit proof</h1>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              {questSource ? "Quest evidence" : "Proof Check"}
+            </span>
+            <h1 className="text-2xl md:text-3xl font-semibold mt-1 break-words">
+              {questSource ? "Log Action" : "Submit proof"}
+            </h1>
             <p className="mt-1 text-sm text-muted-foreground break-words">
-              One measurable artifact. Standard before submission.
+              {questSource
+                ? "What did you do? File the artifact before claiming completion."
+                : "One measurable artifact. Standard before submission."}
             </p>
           </header>
         )}
@@ -1079,7 +1153,7 @@ export default function Proof() {
           <div className="flex items-center gap-2">
             <Gavel className="h-4 w-4 text-primary" />
             <h2 className="font-mono text-[10px] uppercase tracking-widest text-primary m-0">
-              {firstProofMode ? "Submit your first proof" : "Submit proof"}
+              {firstProofMode ? "Submit your first proof" : questSource ? "File Action" : "Submit proof"}
             </h2>
           </div>
 
@@ -1131,7 +1205,9 @@ export default function Proof() {
                 <div className="font-mono uppercase tracking-widest text-primary">Linked contract</div>
                 <div className="mt-1 text-foreground">{linkedContract.title}</div>
                 {linkedContract.required_artifact && (
-                  <div className="mt-0.5 text-muted-foreground">Required: {linkedContract.required_artifact}</div>
+                  <div className="mt-0.5 text-muted-foreground">
+                    {questSource ? "Evidence required" : "Required"}: {linkedContract.required_artifact}
+                  </div>
                 )}
                 {linkedContract.evidence_standard && (
                   <div className="mt-0.5 text-muted-foreground">Standard: {linkedContract.evidence_standard}</div>
@@ -1257,7 +1333,7 @@ export default function Proof() {
 
             <div>
               <Label htmlFor="proof-content">
-                {firstProofMode ? "Paste your work" : "Content"}
+                {firstProofMode ? "Paste your work" : questSource ? "What did you do?" : "Content"}
               </Label>
               <Textarea
                 id="proof-content"
@@ -1587,10 +1663,24 @@ export default function Proof() {
                   ? "Processing attachment…"
                   : firstProofMode
                     ? "Submit first proof"
-                    : "Submit proof"}
+                    : questSource
+                      ? "File Action"
+                      : "Submit proof"}
             </Button>
           </div>
         </Card>
+
+        {verdict?.questSyncPending && (
+          <Card className="panel border-primary/40 bg-primary/5 p-4">
+            <div className="font-mono text-[10px] uppercase tracking-widest text-primary">
+              Action logged // quest sync pending
+            </div>
+            <p className="mt-1 text-sm text-muted-foreground">
+              The artifact exists and remains authoritative. Quest closure will be reconciled
+              independently; do not submit a duplicate action.
+            </p>
+          </Card>
+        )}
 
         {submitting && (
           <Card className="panel p-4 border-primary/30 bg-primary/5 max-w-full overflow-hidden">
@@ -1613,6 +1703,9 @@ export default function Proof() {
               verdict={verdict}
               presentation={verdictPresentation}
               firstProofMode={firstProofMode}
+              settlementHref={
+                questSource ? buildLifeGameSettlementHref(verdict.artifactId) : null
+              }
               onCorrectedAttempt={(presentation) => {
                 setVerdict(null);
                 setSubmittedStudyClassification(null);
@@ -1784,12 +1877,14 @@ function ProofVerdictSummaryCard({
   verdict,
   presentation,
   firstProofMode,
+  settlementHref,
   onCorrectedAttempt,
   onNewProof,
 }: {
   verdict: Verdict;
   presentation: ImprovementLoopPresentation;
   firstProofMode: boolean;
+  settlementHref: string | null;
   onCorrectedAttempt: (presentation: ImprovementLoopPresentation) => void;
   onNewProof: () => void;
 }) {
@@ -1857,6 +1952,25 @@ function ProofVerdictSummaryCard({
         </section>
       </div>
       <div className="mt-4 flex flex-col sm:flex-row gap-2">
+        {settlementHref && (
+          <Link to={settlementHref} className="w-full sm:w-auto">
+            <Button
+              size="sm"
+              className="w-full sm:w-auto min-h-[44px] native-tap"
+              onClick={() => {
+                void logEvent("proof_verdict_cta_clicked", {
+                  route: "/proof",
+                  source: "quest",
+                  ctaName: "open_character_settlement",
+                  destination: settlementHref,
+                });
+              }}
+            >
+              <Zap className="mr-1.5 h-3.5 w-3.5" />
+              Open character settlement
+            </Button>
+          </Link>
+        )}
         {presentation.primaryAction === "corrected_attempt" ? (
           <Link to={presentation.correctedAttemptHref} className="w-full sm:w-auto">
             <Button
