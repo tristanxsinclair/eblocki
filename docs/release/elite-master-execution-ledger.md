@@ -280,6 +280,14 @@ Acceptance evidence:
 - Repo lint -> PASS, 0 errors and 14 pre-existing warnings.
 - Bundle, client-secret, source-secret, and privileged `VITE_` scans found no
   disallowed matches.
+- CI audit reconciliation (2026-07-29):
+  - `npm audit fix` without `--force` updated safe transitive lockfile versions,
+    including DOMPurify and PostCSS.
+  - `npm audit --omit=dev --audit-level=moderate` now reports only two moderate
+    React Router advisories whose available fix is the breaking v7 migration.
+  - CI continues to block high-severity production findings; the React Router
+    migration remains an explicit compatibility risk, not a forced merge-time
+    upgrade.
 - Pricing browser QA passed at 390 px and 1280 px with the test-mode banner,
   working yearly toggle, and no horizontal overflow.
 - Screenshots:
