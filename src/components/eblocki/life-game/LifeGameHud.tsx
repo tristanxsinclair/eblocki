@@ -411,7 +411,7 @@ export function LifeGameHud({
                     {snapshot.recentGameMasterMessages.map((message) => (
                       <div key={message.id} className="rounded-sm border border-border p-3">
                         <p className="line-clamp-2 text-xs text-muted-foreground text-wrap-safe">
-                          {message.userInputPreview}
+                          {message.directiveLabel}
                         </p>
                         <div className="mt-2 font-mono text-[9px] uppercase tracking-widest text-primary">
                           {message.mode ?? "general"} directive filed

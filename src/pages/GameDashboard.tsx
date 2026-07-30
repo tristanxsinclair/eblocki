@@ -5,6 +5,7 @@ import { LifeGameHud } from "@/components/eblocki/life-game/LifeGameHud";
 import { Seo } from "@/components/Seo";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useLifeGameSnapshot } from "@/hooks/useLifeGameSnapshot";
+import { useQuestReconciliation } from "@/hooks/useQuestReconciliation";
 import { logEvent } from "@/lib/eblocki/analytics";
 import {
   isSafeLifeGameRecordId,
@@ -22,6 +23,7 @@ const PANEL_TARGETS = new Map([
 export default function GameDashboard() {
   const [params, setParams] = useSearchParams();
   const { snapshot, loading, refreshing, refresh } = useLifeGameSnapshot();
+  const { repairedCount } = useQuestReconciliation();
   const viewed = useRef(false);
   const settlementPoll = useRef({ artifactId: "", attempts: 0 });
   const settlementLogged = useRef("");
@@ -33,6 +35,10 @@ export default function GameDashboard() {
     () => (snapshot && settlementId ? projectEvidenceSettlement(snapshot, settlementId) : null),
     [settlementId, snapshot],
   );
+
+  useEffect(() => {
+    if ((repairedCount ?? 0) > 0) void refresh();
+  }, [refresh, repairedCount]);
 
   useEffect(() => {
     if (!snapshot || viewed.current) return;

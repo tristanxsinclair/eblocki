@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
+import { localDayKey, resolvedTimeZone } from "@/lib/eblocki/local-day";
 import {
   buildLifeGameSnapshot,
   type CoachInteractionRow,
@@ -71,6 +72,7 @@ export function useLifeGameSnapshot(): UseLifeGameSnapshotResult {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const requestId = useRef(0);
+  const realtimeRefreshTimer = useRef<number | null>(null);
 
   const refresh = useCallback(async () => {
     if (!user) {
@@ -82,7 +84,15 @@ export function useLifeGameSnapshot(): UseLifeGameSnapshotResult {
 
     const currentRequest = ++requestId.current;
     setRefreshing(true);
-    const today = new Date().toISOString().slice(0, 10);
+    const profile = await loadSingleSlice<{ timezone: string | null }>(
+      supabase
+        .from("user_onboarding_profiles")
+        .select("timezone")
+        .eq("user_id", user.id)
+        .maybeSingle(),
+    );
+    const timeZone = profile.data?.timezone || resolvedTimeZone();
+    const today = localDayKey(new Date(), timeZone);
 
     const [
       operator,
@@ -171,7 +181,7 @@ export function useLifeGameSnapshot(): UseLifeGameSnapshotResult {
       loadArraySlice<CoachInteractionRow>(
         supabase
           .from("coach_interactions")
-          .select("id, mode, user_input, created_at")
+          .select("id, mode, created_at")
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
           .limit(3),
@@ -179,48 +189,6 @@ export function useLifeGameSnapshot(): UseLifeGameSnapshotResult {
     ]);
 
     if (currentRequest !== requestId.current) return;
-
-    // Repair a narrow partial-success case: the artifact and commitment link
-    // exist, but the daily objective update failed after filing. This never
-    // creates an artifact or awards XP; it only closes the already-proven quest.
-    const commitmentById = new Map(commitments.data.map((row) => [row.id, row]));
-    const repairCandidates = objectives.data.filter((objective) => {
-      if (objective.status !== "pending" && objective.status !== "active") return false;
-      if (!objective.proof_commitment_id) return false;
-      return Boolean(commitmentById.get(objective.proof_commitment_id)?.proof_artifact_id);
-    });
-    if (repairCandidates.length > 0) {
-      const completedAt = new Date().toISOString();
-      const repairResults = await Promise.allSettled(
-        repairCandidates.map((objective) => {
-          const proofArtifactId =
-            commitmentById.get(objective.proof_commitment_id ?? "")?.proof_artifact_id ?? null;
-          return supabase
-            .from("daily_objectives")
-            .update({
-              status: "completed",
-              proof_artifact_id: proofArtifactId,
-              completed_at: completedAt,
-            })
-            .eq("id", objective.id)
-            .eq("user_id", user.id)
-            .in("status", ["pending", "active"])
-            .select("id")
-            .maybeSingle();
-        }),
-      );
-      repairResults.forEach((result, index) => {
-        if (
-          result.status === "fulfilled" &&
-          !result.value.error &&
-          result.value.data
-        ) {
-          const objectiveId = repairCandidates[index].id;
-          const row = objectives.data.find((objective) => objective.id === objectiveId);
-          if (row) row.status = "completed";
-        }
-      });
-    }
 
     const health: LifeGameHealth = {
       operator: operator.health,
@@ -251,6 +219,7 @@ export function useLifeGameSnapshot(): UseLifeGameSnapshotResult {
         },
         health,
         today,
+        timeZone,
       ),
     );
     setLoading(false);
@@ -263,6 +232,43 @@ export function useLifeGameSnapshot(): UseLifeGameSnapshotResult {
       requestId.current += 1;
     };
   }, [refresh]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const scheduleRefresh = () => {
+      if (realtimeRefreshTimer.current !== null) {
+        window.clearTimeout(realtimeRefreshTimer.current);
+      }
+      realtimeRefreshTimer.current = window.setTimeout(() => {
+        realtimeRefreshTimer.current = null;
+        void refresh();
+      }, 180);
+    };
+
+    const filter = `user_id=eq.${user.id}`;
+    const channel = supabase
+      .channel(`life-game-${user.id}`)
+      .on("postgres_changes", { event: "*", schema: "public", table: "proof_artifacts", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "court_verdicts", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "xp_events", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "operator_level", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "domain_levels", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "identity_ledger", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "daily_objectives", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "proof_commitments", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "momentum_state", filter }, scheduleRefresh)
+      .on("postgres_changes", { event: "*", schema: "public", table: "coach_interactions", filter }, scheduleRefresh)
+      .subscribe();
+
+    return () => {
+      if (realtimeRefreshTimer.current !== null) {
+        window.clearTimeout(realtimeRefreshTimer.current);
+        realtimeRefreshTimer.current = null;
+      }
+      void supabase.removeChannel(channel);
+    };
+  }, [refresh, user]);
 
   return { snapshot, loading, refreshing, refresh };
 }

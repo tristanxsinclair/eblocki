@@ -265,11 +265,17 @@ describe("snapshot defaults", () => {
       },
       { operator: "empty" },
       "2026-07-25",
+      "UTC",
     );
     expect(snapshot.operator.level).toBe(1);
     expect(snapshot.operator.totalXp).toBe(0);
     expect(snapshot.activeQuest).toBeNull();
     expect(snapshot.runLog).toEqual([]);
     expect(snapshot.health.operator).toBe("empty");
+    expect(snapshot.clock).toEqual({
+      localDate: "2026-07-25",
+      timeZone: "UTC",
+      weekStartsOn: 1,
+    });
   });
 });
