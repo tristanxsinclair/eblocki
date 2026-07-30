@@ -1,4 +1,5 @@
 import type { LifeGameSnapshot, LifeStatKey } from "./types";
+import { isSameLocalDay } from "@/lib/eblocki/local-day";
 
 export type LifeGamePulseState =
   | "level_signal"
@@ -116,14 +117,6 @@ function deriveSignals(snapshot: LifeGameSnapshot): LifeGameSignal[] {
   return signals;
 }
 
-function isSameLocalDay(left: Date, right: Date) {
-  return (
-    left.getFullYear() === right.getFullYear() &&
-    left.getMonth() === right.getMonth() &&
-    left.getDate() === right.getDate()
-  );
-}
-
 export function deriveLifeGameProtocol(
   snapshot: LifeGameSnapshot,
   nowInput: Date | string = new Date(),
@@ -134,7 +127,10 @@ export function deriveLifeGameProtocol(
     : (snapshot.runLog.find((entry) => {
         if (entry.kind !== "action") return false;
         const createdAt = new Date(entry.createdAt);
-        return !Number.isNaN(createdAt.getTime()) && isSameLocalDay(createdAt, now);
+        return (
+          !Number.isNaN(createdAt.getTime()) &&
+          isSameLocalDay(createdAt, now, snapshot.clock.timeZone)
+        );
       }) ?? null);
   const filedToday = Boolean(todayAction) || (snapshot.momentum?.proofsToday ?? 0) > 0;
   const actionChosen = Boolean(snapshot.activeQuest) || filedToday;

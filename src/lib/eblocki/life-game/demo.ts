@@ -1,4 +1,5 @@
 import type { LifeGameSnapshot } from "./types";
+import { localDayKey } from "@/lib/eblocki/local-day";
 
 const offsetIso = (now: Date, minutes: number) =>
   new Date(now.getTime() - minutes * 60_000).toISOString();
@@ -12,6 +13,11 @@ export function createLifeGameDemoSnapshot(nowInput: Date | string): LifeGameSna
   if (Number.isNaN(now.getTime())) throw new Error("A valid demo clock is required.");
 
   return {
+    clock: {
+      localDate: localDayKey(now, "UTC"),
+      timeZone: "UTC",
+      weekStartsOn: 1,
+    },
     operator: {
       level: 12,
       title: "Compound Operator",
@@ -110,7 +116,7 @@ export function createLifeGameDemoSnapshot(nowInput: Date | string): LifeGameSna
       {
         id: "demo-gm-1",
         mode: "eblocki",
-        userInputPreview: "I keep polishing instead of shipping the verified slice.",
+        directiveLabel: "Eblocki directive",
         createdAt: offsetIso(now, 18),
       },
     ],

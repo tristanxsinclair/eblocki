@@ -1,4 +1,5 @@
 import { levelThreshold, operatorTitle, rankFor } from "@/lib/eblocki/level-engine";
+import { localDayKey, resolvedTimeZone } from "@/lib/eblocki/local-day";
 import type {
   ActiveQuestView,
   CoachInteractionRow,
@@ -162,7 +163,7 @@ function commitmentToQuest(commitment: ProofCommitmentRow): ActiveQuestView {
 export function projectQuests(
   objectives: DailyObjectiveRow[],
   commitments: ProofCommitmentRow[],
-  today = new Date().toISOString().slice(0, 10),
+  today = localDayKey(),
 ): { activeQuest: ActiveQuestView | null; queuedQuests: ActiveQuestView[] } {
   const openObjectives = objectives
     .filter(
@@ -287,8 +288,9 @@ function projectMessages(rows: CoachInteractionRow[]) {
     .map((row) => ({
       id: row.id,
       mode: row.mode,
-      userInputPreview:
-        row.user_input.length > 56 ? `${row.user_input.slice(0, 53).trimEnd()}…` : row.user_input,
+      directiveLabel: row.mode
+        ? `${row.mode.replace(/[_-]+/g, " ")} directive`
+        : "General directive",
       createdAt: row.created_at,
     }));
 }
@@ -296,12 +298,18 @@ function projectMessages(rows: CoachInteractionRow[]) {
 export function buildLifeGameSnapshot(
   rows: LifeGameSourceRows,
   health: LifeGameHealth,
-  today = new Date().toISOString().slice(0, 10),
+  today = localDayKey(),
+  timeZone = resolvedTimeZone(),
 ): LifeGameSnapshot {
   const level = safeLevel(rows.operator?.level ?? 1);
   const quests = projectQuests(rows.objectives, rows.commitments, today);
 
   return {
+    clock: {
+      localDate: today,
+      timeZone,
+      weekStartsOn: 1,
+    },
     operator: {
       level,
       title: rows.operator?.title ?? operatorTitle(level),

@@ -43,6 +43,11 @@ export interface RunLogEntry {
 }
 
 export interface LifeGameSnapshot {
+  clock: {
+    localDate: string;
+    timeZone: string;
+    weekStartsOn: 0 | 1 | 6;
+  };
   operator: {
     level: number;
     title: string;
@@ -65,7 +70,7 @@ export interface LifeGameSnapshot {
   recentGameMasterMessages: Array<{
     id: string;
     mode: string | null;
-    userInputPreview: string;
+    directiveLabel: string;
     createdAt: string;
   }>;
   health: Record<string, "ok" | "empty" | "error">;
@@ -127,7 +132,7 @@ export type MomentumStateRow = Pick<
 >;
 export type CoachInteractionRow = Pick<
   Tables<"coach_interactions">,
-  "id" | "mode" | "user_input" | "created_at"
+  "id" | "mode" | "created_at"
 >;
 
 export interface LifeGameSourceRows {

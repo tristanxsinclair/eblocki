@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { normaliseModeKey, pickTemplatesForMode } from "@/lib/eblocki/mode-templates";
 import { logEvent } from "@/lib/eblocki/analytics";
 import { assertObjectiveCanComplete } from "@/lib/eblocki/life-game";
+import { localDayKey, resolvedTimeZone } from "@/lib/eblocki/local-day";
 
 export type ObjectiveKind = "mission" | "streak_save" | "recovery" | "boss" | "quick_win";
 export type ObjectiveStatus = "pending" | "active" | "completed" | "skipped" | "failed";
@@ -33,8 +34,6 @@ export interface DailyObjective {
   completion_upgrade: string | null;
 }
 
-const todayISO = () => new Date().toISOString().slice(0, 10);
-
 /** Module-scoped guard so seeding cannot double-fire across hook instances. */
 const seedingInFlight = new Map<string, Promise<void>>();
 
@@ -49,8 +48,7 @@ const seedingInFlight = new Map<string, Promise<void>>();
  * Streak-save injection still runs on subsequent calls if no streak_save
  * row exists yet today AND the user is at risk.
  */
-async function seedIfNeededInner(userId: string) {
-  const date = todayISO();
+async function seedIfNeededInner(userId: string, date: string) {
   const { data: existing } = await supabase
     .from("daily_objectives")
     .select("id, kind, proof_commitment_id")
@@ -184,11 +182,11 @@ async function seedIfNeededInner(userId: string) {
   }
 }
 
-async function seedIfNeeded(userId: string) {
-  const key = `${userId}:${todayISO()}`;
+async function seedIfNeeded(userId: string, date: string) {
+  const key = `${userId}:${date}`;
   const existing = seedingInFlight.get(key);
   if (existing) return existing;
-  const p = seedIfNeededInner(userId).finally(() => seedingInFlight.delete(key));
+  const p = seedIfNeededInner(userId, date).finally(() => seedingInFlight.delete(key));
   seedingInFlight.set(key, p);
   return p;
 }
@@ -205,12 +203,18 @@ export function useDailyObjectives() {
     refreshing.current = true;
     setLoading(true);
     try {
-      await seedIfNeeded(user.id);
+      const { data: profile } = await supabase
+        .from("user_onboarding_profiles")
+        .select("timezone")
+        .eq("user_id", user.id)
+        .maybeSingle();
+      const date = localDayKey(new Date(), profile?.timezone || resolvedTimeZone());
+      await seedIfNeeded(user.id, date);
       const { data } = await supabase
         .from("daily_objectives")
         .select("*")
         .eq("user_id", user.id)
-        .eq("objective_date", todayISO())
+        .eq("objective_date", date)
         .order("position", { ascending: true });
       setObjectives((data ?? []) as DailyObjective[]);
     } finally {
