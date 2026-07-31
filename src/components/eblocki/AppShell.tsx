@@ -48,19 +48,19 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile top: test-mode banner + sticky brand bar. Owns --app-header-h. */}
       <div
         ref={mobileTopRef}
-        className="md:hidden sticky top-0 z-30 w-full max-w-full bg-card"
+        className="operator-chrome md:hidden sticky top-0 z-30 w-full max-w-full"
       >
         <PaymentTestModeBanner />
-        <header className="flex items-center justify-between gap-3 px-4 py-3 border-b border-border bg-card safe-top safe-x w-full max-w-full">
-          <Link to="/dashboard" className="flex items-center gap-2 native-tap min-w-0">
+        <header className="flex min-h-14 items-center justify-between gap-3 border-b border-border/90 px-4 py-2 safe-top safe-x w-full max-w-full">
+          <Link to="/dashboard" className="operator-interactive operator-hit flex items-center gap-2 min-w-0">
             <EblockiLogo variant="compact" size="sm" />
           </Link>
         </header>
       </div>
 
       {/* Desktop / tablet sidebar */}
-      <aside className="hidden md:flex md:w-60 md:min-h-screen border-r border-border bg-card/60 backdrop-blur-sm md:flex-col md:sticky md:top-0 md:h-screen safe-x md:safe-bottom max-w-full min-w-0">
-        <Link to="/dashboard" className="flex items-center gap-2.5 px-5 py-5 border-b border-border md:w-full native-tap">
+      <aside className="operator-chrome hidden md:flex md:w-60 md:min-h-screen border-r md:flex-col md:sticky md:top-0 md:h-screen safe-x md:safe-bottom max-w-full min-w-0">
+        <Link to="/dashboard" className="operator-interactive flex min-h-16 items-center gap-2.5 border-b border-border px-5 py-4 md:w-full">
           <EblockiLogo variant="compact" size="md" />
         </Link>
         <nav className="flex-1 flex md:flex-col gap-1 p-3 min-w-0 max-w-full overflow-y-auto">
@@ -70,7 +70,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               to={n.to}
               className={({ isActive }) =>
                 cn(
-                  "flex items-center gap-2.5 px-3 py-2 rounded-xl text-[11px] font-semibold uppercase tracking-[0.16em] whitespace-nowrap native-tap shrink-0 min-h-[40px] motion-hover",
+                  "operator-interactive flex items-center gap-2.5 px-3 py-2 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] whitespace-nowrap shrink-0 min-h-[44px]",
                   isActive
                     ? "bg-primary/12 text-primary ring-1 ring-primary/25 shadow-[inset_0_1px_0_0_hsl(var(--primary)/0.15)]"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted/40",
@@ -86,7 +86,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <div className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground truncate">{user?.email}</div>
           <button
             onClick={async () => { await signOut(); nav("/"); }}
-            className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:text-destructive motion-hover"
+            className="operator-interactive operator-hit inline-flex items-center gap-1.5 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground hover:text-destructive"
           >
             <LogOut className="h-3.5 w-3.5" /> Sign out
           </button>

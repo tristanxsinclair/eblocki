@@ -53,34 +53,34 @@ const GAME_LOOP = [
 
 export default function Landing() {
   return (
-    <div className="life-game-shell min-h-screen bg-background text-foreground">
+    <div className="operator-surface life-game-shell">
       <Seo
         title="Eblocki — Turn Real Life Into a Game"
         description="A life game where real actions only count when evidence exists."
         path="/"
       />
 
-      <header className="sticky top-0 z-40 border-b border-border bg-background/90 backdrop-blur-xl safe-top safe-x">
+      <header className="operator-chrome sticky top-0 z-40 border-b safe-top safe-x">
         <div className="container flex min-h-16 items-center justify-between gap-3">
-          <Link to="/" className="native-tap">
+          <Link to="/" className="operator-interactive operator-hit inline-flex items-center">
             <EblockiLogo variant="compact" size="md" />
           </Link>
           <nav className="flex items-center gap-3">
             <a
               href="#how-xp-works"
-              className="hidden font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground sm:inline-flex"
+              className="operator-interactive operator-hit hidden items-center px-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground sm:inline-flex"
             >
               How XP works
             </a>
             <Link
               to="/demo"
-              className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-foreground"
+              className="operator-interactive operator-hit inline-flex items-center px-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground"
             >
               Demo
             </Link>
             <Link
               to="/auth"
-              className="font-mono text-[10px] uppercase tracking-widest text-primary"
+              className="operator-interactive operator-hit inline-flex items-center px-2 font-mono text-[10px] uppercase tracking-widest text-primary"
             >
               Sign in
             </Link>
@@ -92,15 +92,15 @@ export default function Landing() {
         <section className="grid-bg border-b border-border">
           <div className="container grid gap-8 py-12 md:grid-cols-[minmax(0,1fr)_minmax(360px,0.9fr)] md:items-center md:py-20 lg:py-24">
             <div className="max-w-3xl">
-              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <div className="operator-label-signal">
                 &gt; Booting Eblocki ...
               </div>
-              <h1 className="mt-5 text-4xl font-semibold leading-[0.98] tracking-tight sm:text-5xl md:text-6xl lg:text-7xl">
+              <h1 className="operator-heading-1 mt-5 md:text-6xl lg:text-7xl">
                 Your life.
                 <br />
                 <span className="text-primary">Turned into a game.</span>
               </h1>
-              <p className="mt-6 max-w-xl text-base leading-7 text-muted-foreground md:text-lg">
+              <p className="operator-body mt-6 max-w-xl md:text-lg">
                 Real actions only count with evidence. Eblocki turns behaviour into artifacts,
                 artifacts into verdicts, and verified progress into a character you actually earned.
               </p>
@@ -140,7 +140,7 @@ export default function Landing() {
                 </Button>
               </div>
 
-              <div className="mt-8 flex items-center gap-2 rounded-sm border border-primary/30 bg-primary/[0.05] px-3 py-2 font-mono text-[10px] uppercase tracking-[0.2em] text-primary sm:inline-flex">
+              <div className="operator-label-signal mt-8 flex min-h-11 items-center gap-2 rounded-md border border-primary/30 bg-primary/[0.05] px-3 py-2 sm:inline-flex">
                 <ShieldCheck className="h-4 w-4" />
                 No artifact // no XP
               </div>
@@ -150,16 +150,16 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="border-b border-border">
-          <div className="container py-14 md:py-18">
+        <section className="operator-section">
+          <div className="container">
             <div className="max-w-2xl">
-              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <div className="operator-label-signal">
                 The core loop
               </div>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2 className="operator-heading-2 mt-2 md:text-4xl">
                 Progress has a transaction.
               </h2>
-              <p className="mt-3 text-muted-foreground">
+              <p className="operator-body mt-3">
                 Fun comes from fast feedback and earned progression—not fake rewards or constant
                 animation.
               </p>
@@ -167,14 +167,14 @@ export default function Landing() {
 
             <div className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
               {GAME_LOOP.map(({ icon: Icon, label, title, body }) => (
-                <Card key={title} className="crt-surface p-4">
+                <Card key={title} className="operator-panel p-5">
                   <div className="flex items-center justify-between">
-                    <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+                    <span className="operator-label">
                       {label}
                     </span>
                     <Icon className="h-4 w-4 text-primary" />
                   </div>
-                  <h3 className="mt-4 font-semibold">{title}</h3>
+                  <h3 className="operator-heading-3 mt-4">{title}</h3>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">{body}</p>
                 </Card>
               ))}
@@ -182,16 +182,16 @@ export default function Landing() {
           </div>
         </section>
 
-        <section id="how-xp-works" className="border-b border-border">
-          <div className="container grid gap-8 py-14 md:grid-cols-[0.8fr_1.2fr] md:items-start md:py-20">
+        <section id="how-xp-works" className="operator-section">
+          <div className="container grid gap-8 md:grid-cols-[0.8fr_1.2fr] md:items-start">
             <div>
-              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <div className="operator-label-signal">
                 Evidence engine
               </div>
-              <h2 className="mt-2 text-3xl font-semibold tracking-tight md:text-4xl">
+              <h2 className="operator-heading-2 mt-2 md:text-4xl">
                 The game cannot award itself.
               </h2>
-              <p className="mt-4 leading-7 text-muted-foreground">
+              <p className="operator-body mt-4">
                 Your character is a view over Eblocki&apos;s existing behavioural evidence system.
                 Postgres remains authoritative for verdicts, XP, levels, and identity escalation.
                 The Game Master can explain a result or issue a quest; it cannot invent one.
@@ -215,11 +215,11 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="border-b border-border">
-          <div className="container grid gap-4 py-14 md:grid-cols-2 md:py-20">
-            <Card className="crt-surface p-6 sm:p-8">
+        <section className="operator-section">
+          <div className="container grid gap-4 md:grid-cols-2">
+            <Card className="operator-panel p-6 sm:p-8">
               <Bot className="h-5 w-5 text-primary" />
-              <div className="mt-5 font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <div className="operator-label-signal mt-5">
                 Game Master
               </div>
               <h2 className="mt-2 text-2xl font-semibold">One exact directive.</h2>
@@ -228,9 +228,9 @@ export default function Landing() {
                 useful through a deterministic local fallback when remote AI is unavailable.
               </p>
             </Card>
-            <Card className="crt-surface p-6 sm:p-8">
+            <Card className="operator-panel p-6 sm:p-8">
               <Swords className="h-5 w-5 text-primary" />
-              <div className="mt-5 font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <div className="operator-label-signal mt-5">
                 Arena
               </div>
               <h2 className="mt-2 text-2xl font-semibold">Practice under pressure.</h2>
@@ -242,10 +242,10 @@ export default function Landing() {
           </div>
         </section>
 
-        <section className="border-b border-border">
-          <div className="container py-14 text-center md:py-20">
+        <section className="operator-section">
+          <div className="container text-center">
             <div className="mx-auto max-w-2xl">
-              <div className="font-mono text-[10px] uppercase tracking-[0.24em] text-primary">
+              <div className="operator-label-signal">
                 Begin with one action
               </div>
               <h2 className="mt-3 text-3xl font-semibold tracking-tight md:text-5xl">
@@ -276,10 +276,10 @@ export default function Landing() {
         <div className="container flex flex-col gap-4 py-8 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
           <EblockiLogo variant="compact" size="sm" />
           <div className="flex flex-wrap gap-4 font-mono text-[10px] uppercase tracking-widest">
-            <Link to="/legal/privacy">Privacy</Link>
-            <Link to="/legal/terms">Terms</Link>
-            <Link to="/legal/ai-disclosure">AI disclosure</Link>
-            <Link to="/pricing">Pricing</Link>
+            <Link to="/legal/privacy" className="operator-interactive inline-flex min-h-11 items-center">Privacy</Link>
+            <Link to="/legal/terms" className="operator-interactive inline-flex min-h-11 items-center">Terms</Link>
+            <Link to="/legal/ai-disclosure" className="operator-interactive inline-flex min-h-11 items-center">AI disclosure</Link>
+            <Link to="/pricing" className="operator-interactive inline-flex min-h-11 items-center">Pricing</Link>
           </div>
         </div>
       </footer>
@@ -289,7 +289,7 @@ export default function Landing() {
 
 function CharacterPreview() {
   return (
-    <Card className="crt-surface overflow-hidden border-primary/30">
+    <Card className="operator-panel-accent overflow-hidden">
       <div className="border-b border-border bg-primary/[0.04] px-4 py-3">
         <div className="flex items-center justify-between gap-3 font-mono text-[9px] uppercase tracking-[0.2em]">
           <span className="text-primary">Character preview</span>
@@ -299,13 +299,13 @@ function CharacterPreview() {
       <div className="p-5">
         <div className="flex items-start justify-between gap-4">
           <div>
-            <div className="font-mono text-[10px] uppercase tracking-widest text-primary">
+            <div className="operator-label-signal">
               Operator Level 12
             </div>
             <h2 className="mt-1 text-xl font-semibold">Compound Operator</h2>
           </div>
           <div className="text-right">
-            <div className="text-lg font-semibold">4,280</div>
+            <div className="operator-number text-lg font-semibold">4,280</div>
             <div className="font-mono text-[8px] uppercase tracking-widest text-muted-foreground">
               Total XP
             </div>
@@ -353,7 +353,7 @@ function PreviewPanel({
   value: string;
 }) {
   return (
-    <div className="rounded-sm border border-border p-3">
+    <div className="operator-panel p-3">
       <div className="flex items-center gap-2 font-mono text-[8px] uppercase tracking-widest text-muted-foreground">
         <Icon className="h-3 w-3 text-primary" />
         {label}
@@ -365,7 +365,7 @@ function PreviewPanel({
 
 function EvidenceRule({ title, body }: { title: string; body: string }) {
   return (
-    <div className="flex gap-3 rounded-sm border border-border bg-card/50 p-4">
+    <div className="operator-panel flex gap-3 p-4">
       <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
       <div>
         <h3 className="font-semibold">{title}</h3>
