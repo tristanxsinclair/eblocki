@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { EvidenceStrength } from "@/lib/eblocki/proof-scoring";
-import { verdictIdentityImpact } from "@/lib/eblocki/verdict-identity-impact";
 import { Link, Navigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
@@ -18,9 +17,7 @@ import {
   Layers,
   MessageSquare,
   Radar,
-  ShieldAlert,
   Sparkles,
-  Target,
 } from "lucide-react";
 import { detectMode, MODE_LABELS, type Mode } from "@/lib/eblocki/modes";
 import { detectState, STATE_LABELS, STATE_PRESCRIPTION, type BehaviouralState } from "@/lib/eblocki/states";
@@ -55,10 +52,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useEntitlement } from "@/hooks/useEntitlement";
 import { hasProofOnDate, plainEvidenceStrength } from "@/lib/eblocki/user-facing-copy";
 
-const EVIDENCE_STRENGTHS: EvidenceStrength[] = ["weak", "moderate", "strong", "elite"];
-
 type UserModeRow = Pick<Tables<"user_modes">, "mode_id">;
 type DashboardArtifactRow = DashboardProofRow & ProofArtifactLike;
+
+const EVIDENCE_STRENGTHS: EvidenceStrength[] = ["weak", "moderate", "strong", "elite"];
 
 function isEvidenceStrength(value: string | null | undefined): value is EvidenceStrength {
   return EVIDENCE_STRENGTHS.includes(value as EvidenceStrength);
@@ -257,15 +254,13 @@ export default function Dashboard() {
           )}
         </header>
 
-        {isMobile && (
-          <ProofClosureCard
-            view={view}
-            proofToday={proofToday}
-            hasAnyProof={allArtifacts.length > 0}
-            todayArtifact={todayArtifact}
-            todayISO={todayISO}
-          />
-        )}
+        <ProofClosureCard
+          view={view}
+          proofToday={proofToday}
+          hasAnyProof={allArtifacts.length > 0}
+          todayArtifact={todayArtifact}
+          todayISO={todayISO}
+        />
 
         {activeDomains.length === 0 && (
           isMobile ? (
@@ -296,59 +291,6 @@ export default function Dashboard() {
               </div>
             </Card>
           )
-        )}
-
-        {!isMobile && allArtifacts.length > 0 && (
-          <CommandHero view={view} state={currentState} latestEvidenceStrength={latestArtifact?.evidence_strength} />
-        )}
-
-        {!isMobile && allArtifacts.length === 0 && (
-          <Card className="panel rounded-2xl p-6 md:p-8 border-primary/30 bg-primary/[0.05] mobile-safe-card">
-            <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-primary">Start here</span>
-            </div>
-            <h2 className="mt-4 text-2xl md:text-3xl font-semibold leading-tight tracking-tight text-wrap-safe">
-              Submit your first proof.
-            </h2>
-            <p className="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground text-wrap-safe max-w-xl">
-              Eblocki will tell you what counted, what was weak, and what to do next.
-            </p>
-            <div className="mt-6 flex flex-col sm:flex-row gap-2 sm:flex-wrap">
-              <Link to={submitProofHref} className="w-full sm:w-auto">
-                <Button
-                  size="sm"
-                  className="w-full sm:w-auto rounded-xl"
-                  onClick={() => {
-                    void logEvent("activation_landing_primary_cta_clicked", {
-                      route: "/dashboard",
-                      destination: submitProofHref,
-                      ctaName: "dashboard_submit_first_proof",
-                    });
-                  }}
-                >
-                  Submit first proof
-                  <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-                </Button>
-              </Link>
-              <Link to="/proof-week" className="w-full sm:w-auto">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full sm:w-auto rounded-xl"
-                  onClick={() => {
-                    void logEvent("activation_landing_primary_cta_clicked", {
-                      route: "/dashboard",
-                      destination: "/proof-week",
-                      ctaName: "dashboard_see_what_counts",
-                    });
-                  }}
-                >
-                  See what counts
-                </Button>
-              </Link>
-            </div>
-          </Card>
         )}
 
         {isMobile ? (
@@ -462,65 +404,6 @@ export default function Dashboard() {
         )}
       </div>
     </AppShell>
-  );
-}
-
-export function CommandHero({
-  view,
-  state,
-  latestEvidenceStrength,
-}: {
-  view: ReturnType<typeof buildDashboardViewModel>;
-  state: BehaviouralState | null;
-  latestEvidenceStrength?: string | null;
-}) {
-  const secondaryLabel = view.commandSummary.secondaryHref === "/coach" ? "Open coach" : "Plan today";
-  const identityImpact = isEvidenceStrength(latestEvidenceStrength)
-    ? verdictIdentityImpact(latestEvidenceStrength)
-    : null;
-  return (
-    <Card className="panel rounded-2xl p-6 md:p-7 border-primary/30 bg-primary/[0.06] mobile-safe-card">
-      <div className="flex items-start justify-between gap-4 flex-wrap min-w-0">
-        <div className="min-w-0 max-w-3xl">
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-primary/30 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-primary">
-              <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-              Today · Next step
-            </span>
-            <span className="rounded-full border border-border bg-background/40 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-              {view.dashboardStatus.replace(/_/g, " ")}
-            </span>
-            {state && <StateBadge state={state} />}
-          </div>
-          <h2 className="mt-4 text-2xl md:text-3xl font-semibold leading-tight tracking-tight text-wrap-safe">{view.commandSummary.title}</h2>
-          <p className="mt-3 text-sm md:text-base leading-relaxed text-muted-foreground max-w-2xl text-wrap-safe">
-            <span className="text-foreground">After this proof:</span> {view.commandSummary.nextBestAction}
-          </p>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto sm:flex-wrap">
-          <Link to={view.commandSummary.primaryHref} className="w-full sm:w-auto">
-            <Button size="sm" className="w-full sm:w-auto rounded-xl">
-              Submit proof<ArrowRight className="h-3.5 w-3.5 ml-1.5" />
-            </Button>
-          </Link>
-          <Link to={view.commandSummary.secondaryHref} className="w-full sm:w-auto">
-            <Button size="sm" variant="outline" className="w-full sm:w-auto rounded-xl">
-              {secondaryLabel}
-            </Button>
-          </Link>
-        </div>
-      </div>
-      <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-        <CommandSignal icon={<Target />} label="Proof required" value={view.commandSummary.proofRequired} />
-        <CommandSignal icon={<ShieldAlert />} label="Risk if ignored" value={view.commandSummary.highestRisk} />
-        <CommandSignal
-          icon={<Gavel />}
-          label="Latest verdict"
-          value={view.commandLayer.latestCourtSignal}
-          hint={identityImpact?.headline}
-        />
-      </div>
-    </Card>
   );
 }
 
@@ -671,26 +554,6 @@ function SectionHeader({ eyebrow, title, detail }: { eyebrow: string; title: str
         <h2 className="text-base font-semibold mt-1 tracking-tight">{title}</h2>
       </div>
       {detail && <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">{detail}</span>}
-    </div>
-  );
-}
-
-function CommandSignal({ icon, label, value, hint }: { icon: ReactNode; label: string; value: string; hint?: string }) {
-  return (
-    <div className="rounded-xl border border-primary/20 bg-background/30 p-3.5 min-w-0">
-      <div className="flex items-center gap-1.5 text-primary [&_svg]:h-3.5 [&_svg]:w-3.5">
-        {icon}
-        <span className="text-[10px] font-semibold uppercase tracking-[0.2em]">{label}</span>
-      </div>
-      <div className="mt-1.5 text-sm leading-snug line-clamp-2">{value}</div>
-      {hint && (
-        <div
-          className="mt-1.5 text-xs leading-snug text-muted-foreground line-clamp-1 break-words"
-          data-testid="dashboard-verdict-identity-impact"
-        >
-          {hint}
-        </div>
-      )}
     </div>
   );
 }
