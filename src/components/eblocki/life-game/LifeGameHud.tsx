@@ -149,7 +149,7 @@ export function LifeGameHud({
   }, [settlementId]);
 
   return (
-    <div className="life-game-shell scanlines mobile-safe-page min-h-full">
+    <div className="operator-surface life-game-shell scanlines mobile-safe-page min-h-full">
       {boot.visible && (
         <div
           className="life-game-boot crt-surface"
@@ -164,7 +164,7 @@ export function LifeGameHud({
         </div>
       )}
 
-      <div className="mx-auto max-w-[1440px] px-4 py-5 sm:px-6 md:py-8">
+      <div className="operator-page-wide page-enter">
         {demo && (
           <div className="mb-4 flex items-center justify-between gap-3 rounded-sm border border-primary/50 bg-primary/10 px-3 py-2">
             <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.24em] text-primary">
@@ -176,20 +176,20 @@ export function LifeGameHud({
           </div>
         )}
 
-        <header id="operator" className="crt-surface rounded-sm border border-primary/30 p-4 md:p-5">
+        <header id="operator" className="operator-panel-accent p-4 md:p-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
-              <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.22em]">
+              <div className="operator-label flex flex-wrap items-center gap-2">
                 <span className="text-primary">Operator Level {snapshot.operator.level}</span>
                 <span className="text-muted-foreground">//</span>
                 <span className="text-muted-foreground">{snapshot.operator.rank}</span>
               </div>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight sm:text-3xl">
+              <h1 className="operator-heading-2 mt-2">
                 {snapshot.operator.title}
               </h1>
             </div>
 
-            <div className="grid min-w-0 grid-cols-2 gap-2 sm:grid-cols-4 lg:min-w-[500px]">
+            <div className="operator-stat-grid lg:min-w-[500px]">
               <HeaderMetric label="Total XP" value={snapshot.operator.totalXp.toLocaleString()} />
               <HeaderMetric
                 label="Streak"
@@ -252,13 +252,13 @@ export function LifeGameHud({
             settlementPreviewHref={settlementPreviewHref}
           />
 
-          <section id="stats" className="crt-surface hud-stats rounded-sm border border-border p-4">
+          <section id="stats" className="operator-panel hud-stats p-4">
             <PanelHeading icon={Trophy} eyebrow="Character" title="Projected stats" />
             <div className="mt-4 space-y-3">
               {snapshot.stats.map((stat) => (
                 <div
                   key={stat.key}
-                  className="rounded-sm border border-border/80 bg-background/50 p-3"
+                  className="operator-stat"
                   title={
                     stat.contributingDomains.length > 0
                       ? `Projection from ${stat.contributingDomains.join(", ")}`
@@ -267,7 +267,7 @@ export function LifeGameHud({
                 >
                   <div className="flex items-center justify-between gap-3">
                     <span className="font-mono text-xs uppercase tracking-widest">{stat.label}</span>
-                    <span className="font-mono text-xs text-primary">LVL {stat.level}</span>
+                    <span className="operator-number text-xs text-primary">LVL {stat.level}</span>
                   </div>
                   <Progress
                     value={stat.progressPercent}
@@ -284,7 +284,7 @@ export function LifeGameHud({
             </div>
           </section>
 
-          <section id="quests" className="crt-surface hud-quest rounded-sm border border-primary/35 p-4 sm:p-5">
+          <section id="quests" className="operator-panel-accent hud-quest p-4 sm:p-5">
             <PanelHeading icon={Activity} eyebrow="Priority one" title="Active quest" />
             {snapshot.activeQuest ? (
               <div className="mt-5">
@@ -369,7 +369,7 @@ export function LifeGameHud({
             )}
           </section>
 
-          <section id="gm" className="crt-surface hud-gm rounded-sm border border-border p-4">
+          <section id="gm" className="operator-panel hud-gm p-4">
             <PanelHeading icon={Bot} eyebrow="Directive channel" title="Game Master" />
             <div className="mt-4 rounded-sm border border-primary/25 bg-primary/[0.04] p-3">
               <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-primary">
@@ -439,12 +439,12 @@ export function LifeGameHud({
           </section>
         </div>
 
-        <section id="run-log" className="crt-surface mt-4 rounded-sm border border-border p-4 sm:p-5">
+        <section id="run-log" className="operator-panel mt-4 p-4 sm:p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <PanelHeading icon={ScrollText} eyebrow="Authoritative feed" title="Run Log" />
             <div className="flex flex-wrap items-center justify-end gap-2">
               <div
-                className="flex rounded-sm border border-border bg-background/50 p-0.5"
+                className="flex rounded-md border border-border bg-background/50 p-0.5"
                 role="group"
                 aria-label="Filter Run Log"
               >
@@ -493,7 +493,7 @@ export function LifeGameHud({
           )}
         </section>
 
-        <section id="intel" className="mt-4 flex flex-col gap-3 rounded-sm border border-border bg-card/40 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <section id="intel" className="operator-panel mt-4 flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <div className="font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               Intel // advanced evidence systems
@@ -529,7 +529,7 @@ function RunPulsePanel({
 }) {
   return (
     <section
-      className="run-pulse hud-pulse crt-surface rounded-sm border border-primary/25 p-4"
+      className="run-pulse hud-pulse operator-panel-accent p-4"
       aria-label="Current run pulse"
     >
       <div className="grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,1fr)] lg:items-center">
@@ -824,7 +824,7 @@ function EvidenceSettlementReveal({
           <button
             type="button"
             onClick={onDismiss}
-            className="native-tap flex h-9 w-9 shrink-0 items-center justify-center rounded-sm border border-border text-muted-foreground hover:border-primary/35 hover:text-primary"
+            className="operator-interactive operator-hit flex shrink-0 items-center justify-center border border-border text-muted-foreground hover:border-primary/35 hover:text-primary"
             aria-label="Dismiss evidence settlement"
           >
             <X className="h-4 w-4" />

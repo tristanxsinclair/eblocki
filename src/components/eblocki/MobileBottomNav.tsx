@@ -68,7 +68,7 @@ export function MobileBottomNav() {
     <nav
       ref={navRef}
       aria-label="Primary mobile navigation"
-      className="md:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/80 bg-card/95 backdrop-blur-lg supports-[backdrop-filter]:bg-card/80 safe-bottom safe-x shadow-[0_-4px_20px_-4px_hsl(0_0%_0%/0.4)]"
+      className="operator-chrome md:hidden fixed bottom-0 inset-x-0 z-40 border-t safe-bottom safe-x"
     >
       <ul className="grid grid-cols-4">
         {PRIMARY.map((item) => (
@@ -79,7 +79,7 @@ export function MobileBottomNav() {
               onClick={() => haptics.select()}
               className={({ isActive }) =>
                 cn(
-                  "native-tap flex flex-col items-center justify-center gap-0.5 min-h-[56px] px-1 py-1.5 text-[10px] font-mono uppercase tracking-widest",
+                  "operator-interactive flex flex-col items-center justify-center gap-0.5 min-h-[56px] px-1 py-1.5 text-[10px] font-mono uppercase tracking-widest",
                   isActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground",
@@ -112,7 +112,7 @@ export function MobileBottomNav() {
                 type="button"
                 aria-label="Open more navigation"
                 className={cn(
-                  "native-tap flex flex-col items-center justify-center gap-0.5 min-h-[56px] w-full px-1 py-1.5 text-[10px] font-mono uppercase tracking-widest",
+                  "operator-interactive flex flex-col items-center justify-center gap-0.5 min-h-[56px] w-full px-1 py-1.5 text-[10px] font-mono uppercase tracking-widest",
                   moreActive
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground",
@@ -142,7 +142,7 @@ export function MobileBottomNav() {
                       to={item.to}
                       onClick={() => setMoreOpen(false)}
                       className={cn(
-                        "native-tap flex items-center gap-3 rounded-sm border border-border bg-background/40 px-3 py-3 min-h-[48px] text-sm",
+                        "operator-interactive flex items-center gap-3 border border-border bg-background/40 px-3 py-3 min-h-[48px] text-sm",
                         location.pathname.startsWith(item.to)
                           ? "border-primary/40 text-primary"
                           : "text-foreground hover:border-primary/30",
@@ -165,7 +165,7 @@ export function MobileBottomNav() {
                     await signOut();
                     nav("/");
                   }}
-                  className="native-tap mt-2 inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-destructive min-h-[44px]"
+                  className="operator-interactive operator-hit mt-2 inline-flex items-center gap-1.5 text-xs font-mono text-muted-foreground hover:text-destructive"
                 >
                   <LogOut className="h-3.5 w-3.5" /> Sign out
                 </button>

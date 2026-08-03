@@ -110,7 +110,7 @@ export default function GameDashboard() {
         path="/game"
       />
       {loading || !snapshot ? (
-        <div className="mx-auto max-w-[1440px] space-y-4 px-4 py-6 sm:px-6">
+        <div className="operator-page-wide">
           <Skeleton className="h-44 w-full" />
           <div className="grid gap-4 lg:grid-cols-[240px_minmax(0,1fr)_300px]">
             <Skeleton className="h-[420px]" />

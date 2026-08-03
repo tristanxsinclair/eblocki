@@ -887,13 +887,13 @@ export default function Proof() {
           : "Submit proof artifacts, score evidence strength, and close pending Proof Contracts."}
         path="/proof"
       />
-      <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6 min-w-0 max-w-full text-wrap-safe">
+      <div className="operator-page page-enter">
         {firstProofMode ? (
-          <header className="min-w-0">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-primary">
+          <header className="min-w-0 border-b border-border/80 pb-5">
+            <span className="operator-label-signal">
               Activation · First Proof
             </span>
-            <h1 className="text-2xl md:text-3xl font-semibold mt-1 break-words">
+            <h1 className="operator-heading-1 mt-2 break-words">
               {FIRST_PROOF_COPY.title}
             </h1>
             <p className="mt-2 text-sm md:text-base text-muted-foreground break-words">
@@ -901,11 +901,11 @@ export default function Proof() {
             </p>
           </header>
         ) : (
-          <header className="min-w-0">
-            <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+          <header className="min-w-0 border-b border-border/80 pb-5">
+            <span className="operator-label">
               {questSource ? "Quest evidence" : "Proof Check"}
             </span>
-            <h1 className="text-2xl md:text-3xl font-semibold mt-1 break-words">
+            <h1 className="operator-heading-1 mt-2 break-words">
               {questSource ? "Log Action" : "Submit proof"}
             </h1>
             <p className="mt-1 text-sm text-muted-foreground break-words">
@@ -1121,7 +1121,7 @@ export default function Proof() {
           <MobileCollapse eyebrow="Stats" label="Strength tally & filter" trackId="proof_stats">
             <Card className="panel p-4 max-w-full overflow-hidden">
               <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <div className="grid grid-cols-4 gap-2 flex-1">
+                <div className="grid flex-1 grid-cols-2 gap-2 sm:grid-cols-4">
                   {(["weak", "moderate", "strong", "elite"] as const).map((s) => (
                     <div key={s} className="rounded-sm border border-border p-2 text-center min-w-0">
                       <div className="font-mono text-[9px] uppercase tracking-widest text-muted-foreground">{plainEvidenceStrength(s)}</div>
@@ -1135,7 +1135,7 @@ export default function Proof() {
                     id="proof-domain-filter"
                     value={filterDomain}
                     onChange={(e) => setFilterDomain(e.target.value)}
-                    className="rounded-md border border-input bg-background px-3 py-1.5 text-sm max-w-full"
+                    className="operator-control max-w-full"
                   >
                     <option value="all">all modes</option>
                     {activeModes.map((mode) => (
@@ -1350,7 +1350,7 @@ export default function Proof() {
               type="button"
               onClick={() => setDetailOpen((open) => !open)}
               aria-expanded={detailOpen}
-              className="w-full min-h-[44px] rounded-sm border border-border bg-card/40 px-3 py-2 text-left transition-colors hover:border-primary/40 flex items-center justify-between gap-3"
+              className="operator-interactive operator-hit flex w-full items-center justify-between gap-3 border border-border bg-card/40 px-3 py-2 text-left hover:border-primary/40"
             >
               <div className="min-w-0">
                 <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Optional</div>

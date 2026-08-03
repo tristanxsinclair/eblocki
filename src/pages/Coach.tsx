@@ -342,23 +342,23 @@ export default function Coach() {
         description="Diagnose the real bottleneck, receive one quest, and define the evidence required to close it."
         path="/coach"
       />
-      <div className="mobile-safe-page p-4 md:p-8 max-w-5xl mx-auto space-y-5 min-w-0 max-w-full text-wrap-safe md:pb-8">
-        <header className="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end min-w-0">
+      <div className="operator-page page-enter">
+        <header className="grid min-w-0 gap-4 border-b border-border/80 pb-5 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <div className="flex items-center gap-3 min-w-0">
             <EblockiLogo variant="mark" size="md" />
             <div className="min-w-0">
               {!isMobile && (
-                <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Game Master // Evidence-bound Directive Engine</span>
+                <span className="operator-label">Game Master // Evidence-bound Directive Engine</span>
               )}
-              <h1 className="text-2xl md:text-3xl font-semibold mt-1 break-words">Bring the real bottleneck. Leave with one quest.</h1>
+              <h1 className="operator-heading-1 mt-2 break-words">Bring the real bottleneck. Leave with one quest.</h1>
             </div>
           </div>
           </header>
 
-        <Card className="panel overflow-hidden border-primary/25 bg-card/60 max-w-full">
+        <Card className="operator-panel-accent max-w-full overflow-hidden">
           <div className="border-b border-border px-4 py-3 flex items-center justify-between gap-3 min-w-0">
             <div className="min-w-0">
-              <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Input Console</div>
+              <div className="operator-label">Input Console</div>
               <div className="mt-1 text-sm text-foreground break-words">Question, notes, thought dump, sales situation, legal issue, or avoidance pattern.</div>
             </div>
             <BrainCircuit className="h-4 w-4 text-primary shrink-0" />
@@ -380,7 +380,7 @@ export default function Coach() {
                       type="button"
                       onClick={() => setSelectedMode(chip.value)}
                       className={cn(
-                        "rounded-sm border px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors min-h-[44px] flex items-center gap-1.5",
+                        "operator-interactive operator-hit flex items-center gap-1.5 border px-3 py-2 font-mono text-[10px] uppercase tracking-widest",
                         selectedMode === chip.value ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
                       )}
                     >
@@ -392,7 +392,7 @@ export default function Coach() {
               </MobileCollapse>
             ) : (
               <div>
-                <div className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground mb-2">Mode chips</div>
+                <div className="operator-label mb-2">Mode chips</div>
                 <div className="flex flex-wrap gap-2">
                   {MODE_CHIPS.map((chip) => (
                     <button
@@ -400,7 +400,7 @@ export default function Coach() {
                       type="button"
                       onClick={() => setSelectedMode(chip.value)}
                       className={cn(
-                        "rounded-sm border px-3 py-2 font-mono text-[10px] uppercase tracking-widest transition-colors flex items-center gap-1.5",
+                        "operator-interactive operator-hit flex items-center gap-1.5 border px-3 py-2 font-mono text-[10px] uppercase tracking-widest",
                         selectedMode === chip.value ? "border-primary bg-primary/10 text-primary" : "border-border text-muted-foreground hover:text-foreground hover:bg-muted/40",
                       )}
                     >
@@ -567,7 +567,7 @@ export default function Coach() {
                 key={prompt}
                 size="sm"
                 variant="outline"
-                className="text-xs whitespace-normal text-left h-auto py-2 motion-micro"
+                className="min-h-11 h-auto whitespace-normal py-2 text-left text-xs motion-micro"
                 onClick={() => setInput((prev) => (prev.trim() ? `${prev.trim()}\n\n${prompt}` : prompt))}
               >
                 {prompt}
@@ -710,7 +710,7 @@ function CoachFullReasoning({
 }) {
   return (
     <details className="group rounded-sm border border-border bg-card/50 p-4 max-w-full overflow-hidden">
-      <summary className="flex min-h-[44px] cursor-pointer list-none items-center justify-between gap-3">
+      <summary className="operator-interactive flex min-h-11 cursor-pointer list-none items-center justify-between gap-3">
         <span className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">Full reasoning</span>
         <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
       </summary>
