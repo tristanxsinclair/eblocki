@@ -38,6 +38,10 @@ jobs:
         run: npm run test:proof-ui-tokens
 
       - name: Build
+        env:
+          EBLOCKI_BUILD_SHA: ${{ github.sha }}
+          EBLOCKI_BUILD_ID: github-${{ github.run_id }}-${{ github.run_attempt }}
+          EBLOCKI_BUILD_ENV: ci
         run: npm run build
 
       - name: Bundle-size guardrail (desktop UI regression check)
