@@ -10,8 +10,9 @@
 - Branch: `codex/wp0-production-truth`
 - Inspected base HEAD SHA: `6ab937ce806a3e67e3d420706afd9b332db64ebb`
 - Base commit: `Merge pull request #110 from tristanxsinclair/codex/eblocki-sophistication`
-- Working tree: WP0 implementation and this receipt pending focused commit
-- Remote status at inspection: branch based on and tracking `origin/main`; WP0 changes not yet pushed
+- WP0 implementation commit: `c991de409e0479767281886590c5b32d22c8672b`
+- Working tree: clean after focused commits
+- Remote status: `codex/wp0-production-truth` pushed; draft PR #111 targets `main`
 
 ## Build identity
 
@@ -62,7 +63,7 @@ Corrections:
 | Route smoke | preview on `127.0.0.1:4172`; `npm run smoke:routes` | PASS | 17/17 routes returned HTTP 200 |
 | Bundle guardrail | `npm run perf:bundle-size` | PASS | all JS/CSS chunks within repository budgets |
 | Production audit | `npm audit --omit=dev --audit-level=high` | PASS | no high production finding; two moderate React Router advisories remain and require a breaking v7 upgrade |
-| CI | GitHub Actions query for base SHA | PASS (base only) | CI, Pages, and Datadog workflows succeeded for `6ab937c`; no CI exists yet for the unpushed WP0 candidate |
+| CI | GitHub PR #111 checks for `c991de4` | PASS | Verify product, test/build/lint, mobile Playwright, and Pages build all passed; Supabase Preview skipped |
 
 ## Supabase alignment
 
@@ -106,7 +107,7 @@ Status: **NOT OBSERVED**
 
 ## Remaining blockers
 
-- WP0 candidate is not yet committed, pushed, reviewed by CI, or published to canonical production.
+- WP0 candidate is committed, pushed, and green in CI, but is not merged or published to canonical production.
 - The new XP uniqueness migration is not verified as applied in production.
 - Production Supabase schema and Edge Function versions cannot be matched to repository source with current access.
 - Canonical production exposes no SHA/build ID that can be matched to the candidate.
