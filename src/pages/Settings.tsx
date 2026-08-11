@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { Seo } from "@/components/Seo";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
-import { Shield, Download, Trash2, FileText as FileTextIcon, LogOut } from "lucide-react";
+import { Shield, Download, Trash2, FileText as FileTextIcon, LogOut, ServerCog } from "lucide-react";
 import { track, reset as resetAnalytics, EVENTS } from "@/lib/analytics";
 import { BetaFeedback } from "@/components/eblocki/BetaFeedback";
 import { NotificationPreferences } from "@/components/eblocki/NotificationPreferences";
@@ -22,6 +22,7 @@ import { UpgradeCard } from "@/components/eblocki/UpgradeCard";
 import { normaliseAccessLevel } from "@/lib/eblocki/access-level";
 import { BillingCard } from "@/components/eblocki/BillingCard";
 import { DeleteAccountDialog } from "@/components/eblocki/DeleteAccountDialog";
+import { buildInfo } from "@/lib/eblocki/build-info";
 
 const MODELS = [
   "google/gemini-3-flash-preview",
@@ -404,6 +405,31 @@ export default function Settings() {
         <PasswordSecurity />
         <BillingCard />
         <BetaFeedback />
+
+        <Card className="panel p-4 md:p-5 space-y-4 max-w-full overflow-hidden" data-testid="system-build-information">
+          <div className="flex items-start gap-3 min-w-0">
+            <ServerCog className="h-5 w-5 mt-0.5 text-primary shrink-0" aria-hidden="true" />
+            <div className="min-w-0">
+              <span className="font-mono text-[10px] uppercase tracking-widest text-primary">System</span>
+              <h2 className="text-xl font-semibold mt-1">Build information</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                Use these values to match this app to a verified source revision.
+              </p>
+            </div>
+          </div>
+          <dl className="grid sm:grid-cols-2 gap-3 text-sm">
+            <BuildInfoRow label="Commit" value={buildInfo.shortCommitSha} title={buildInfo.commitSha ?? undefined} />
+            <BuildInfoRow label="Build ID" value={buildInfo.buildId} />
+            <BuildInfoRow label="Built" value={formatBuildTimestamp(buildInfo.buildTimestamp)} />
+            <BuildInfoRow label="Environment" value={buildInfo.environment} />
+            <BuildInfoRow label="App version" value={buildInfo.appVersion} />
+          </dl>
+          {!buildInfo.commitSha && (
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              Source revision unavailable. Do not treat this build as verified production provenance.
+            </p>
+          )}
+        </Card>
       </div>
       <DeleteAccountDialog
         open={deleteDialogOpen}
@@ -414,6 +440,21 @@ export default function Settings() {
         onConfirm={deleteAccount}
       />
     </AppShell>
+  );
+}
+
+function formatBuildTimestamp(value: string | null): string | null {
+  if (!value) return null;
+  const parsed = new Date(value);
+  return Number.isNaN(parsed.getTime()) ? value : parsed.toLocaleString();
+}
+
+function BuildInfoRow({ label, value, title }: { label: string; value: string | null; title?: string }) {
+  return (
+    <div className="rounded-sm border border-border p-3 min-w-0">
+      <dt className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">{label}</dt>
+      <dd className="mt-1 font-mono text-xs break-all" title={title}>{value ?? "Unavailable"}</dd>
+    </div>
   );
 }
 
