@@ -69,12 +69,13 @@ Corrections:
 
 ## Supabase alignment
 
+- Read-only access check (post-publication WP0 pass): `SUPABASE_ACCESS_TOKEN` was absent in both the sandbox and approved host process. The production project reference resolved from `supabase/config.toml`. No database or Management API query was attempted without the credential.
 - Local schema: `proof_artifacts` drives the `cle_after_proof_insert` trigger; the May 20 CLE migration creates `xp_events`, `court_verdicts`, `domain_levels`, `operator_level`, and `identity_ledger`.
 - Generated types: contain the proof, verdict, XP, ledger, commitment, objective, operator, and domain structures read by current source.
 - Frontend writes: `Proof.tsx` inserts the generated `proof_artifacts` fields, then links commitments/objectives using ownership and null guards.
 - CLE: Postgres creates the authoritative verdict, XP event, ledger entry, and progression updates after artifact insert. `court_verdicts.proof_id` is already a primary key.
 - Duplicate protection: the WP0 migration adds a partial unique index on `xp_events(proof_id)` for non-null proof IDs. Court is one-per-proof; commitment/objective closure is guarded; multiple ledger kinds for one proof remain intentional.
-- Production state: **UNVERIFIED**. The environment has no Supabase CLI, access token, database password, or production connection; local migration files are not deployment evidence.
+- Production state: **UNVERIFIED**. The promised read-only Supabase access token was not present in the runtime; local migration files are not deployment evidence.
 - Edge functions: **UNVERIFIED**. Local Coach and support functions were inspected, but the environment has no deployment access with which to match source to the deployed versions.
 
 Verdict: **UNVERIFIED**
@@ -111,6 +112,7 @@ Status: **NOT OBSERVED**
 
 ## Remaining blockers
 
+- The read-only `SUPABASE_ACCESS_TOKEN` is not present in the Codex runtime, so production catalog and deployed Edge Function metadata cannot be inspected.
 - The new XP uniqueness migration is not verified as applied in production.
 - Production Supabase schema and Edge Function versions cannot be matched to repository source with current access.
 - No legitimate authenticated production session was available for the real evidence-settlement loop.
