@@ -12,7 +12,7 @@ This roadmap is gated. A later work package cannot begin until every earlier gat
 | WP5 | Temporal Calibration | NOT STARTED | Blocked by WP0 |
 | WP6 | Human Evidence Twin Beta | NOT STARTED | Blocked by WP0 |
 
-WP0 was reverified after PR #111 merged to main at `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3`. It remains blocked because canonical production is still serving a pre-WP0 bundle; production Supabase/Edge alignment and the authenticated settlement loop are also unobserved.
+WP0 was reverified after PR #111 merged to main at `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3` and Lovable canonical production was manually republished. Live build identity now matches main. WP0 remains blocked because production Supabase/Edge alignment and the authenticated non-duplicating settlement loop are unobserved.
 
 ## Gate rule
 

@@ -2,7 +2,7 @@
 
 ## Verdict
 
-**BLOCKED — canonical production is not running the merged WP0 release, and production schema/runtime plus authenticated-loop evidence remain missing.**
+**BLOCKED — canonical production now matches merged main, but production schema/runtime and authenticated-loop evidence remain missing.**
 
 ## Repository
 
@@ -83,12 +83,14 @@ Verdict: **UNVERIFIED**
 
 - Canonical URL: `https://eblocki.space`
 - Expected SHA: `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3`
-- Live SHA: unavailable
-- Expected build ID: publisher-generated; unavailable until canonical production builds merged main
-- Live build ID: unavailable
-- Main → live: **MISMATCH**
+- Live SHA: `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3`
+- Live build ID: `93b118ca8e34-20260811043923`
+- Live build timestamp: `2026-08-11T04:39:23.746Z`
+- Live environment: `production`
+- Live app version: `0.0.0`
+- Main → live: **MATCH**
 
-Observed on 11 August 2026 (Australia/Perth): canonical production served `assets/index-CseAZrM0.js`. The 951,087-byte live bundle does not contain main SHA `93b118c`, the `Build information` label, or the WP0 unavailable-provenance warning. Therefore canonical production is still a pre-WP0 build. Navigating to `/settings` redirected to `/auth`.
+Publication history on 11 August 2026 (Australia/Perth): WP0 was initially blocked by the unmerged PR, then by canonical production serving pre-WP0 bundle `assets/index-CseAZrM0.js`. After the user manually republished through Lovable, a cache-bypassed retrieval served new bundle `assets/index-DjGr7P_P.js` (996,517 bytes). Its compiled build contract contains the exact main SHA, build ID, UTC timestamp, production environment, and app version recorded above. The Settings card remains protected; navigating to `/settings` redirected to `/auth` because no legitimate session was available.
 
 ## Authenticated production evidence loop
 
@@ -109,10 +111,8 @@ Status: **NOT OBSERVED**
 
 ## Remaining blockers
 
-- PR #111 is merged and main is green in CI, but canonical production is still serving a pre-WP0 bundle.
 - The new XP uniqueness migration is not verified as applied in production.
 - Production Supabase schema and Edge Function versions cannot be matched to repository source with current access.
-- Canonical production exposes no SHA/build ID that can be matched to the candidate.
 - No legitimate authenticated production session was available for the real evidence-settlement loop.
 
 ## Evidence limitations
@@ -124,4 +124,4 @@ Status: **NOT OBSERVED**
 
 ## Final WP0 decision
 
-WP0 is **BLOCKED**. Merged-main source/build verification passes, but canonical production does not contain the merged release. Production Supabase/runtime alignment and an authenticated non-duplicating settlement loop also remain unobserved. WP1 must not begin.
+WP0 is **BLOCKED**. Merged main and canonical production now match through the deployed build identity contract. Production Supabase/runtime alignment and an authenticated non-duplicating settlement loop remain unobserved, so XP idempotency is not yet proven in production. WP1 must not begin.
