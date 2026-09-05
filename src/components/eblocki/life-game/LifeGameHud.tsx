@@ -4,7 +4,6 @@ import {
   Activity,
   ArrowRight,
   BadgeCheck,
-  Bot,
   CheckCircle2,
   CircleDashed,
   CloudOff,
@@ -22,6 +21,7 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { QuestDirectorPanel } from "@/components/eblocki/life-game/QuestDirectorPanel";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import type {
@@ -32,7 +32,6 @@ import type {
 } from "@/lib/eblocki/life-game";
 import {
   buildLifeGameSettlementHref,
-  DEMO_GAME_MASTER_SCRIPT,
   deriveLifeGamePulse,
   LIFE_GAME_STATUS_COPY,
   projectEvidenceSettlement,
@@ -47,13 +46,12 @@ interface LifeGameHudProps {
   onDismissSettlement?: () => void;
   settlementPreviewHref?: string | null;
 }
-
 type RunLogFilter = "all" | "actions" | "system" | "pending";
 
 const HUD_COMMANDS = [
   { href: "#quests", label: "Quest" },
   { href: "#stats", label: "Stats" },
-  { href: "#gm", label: "GM" },
+  { href: "#director", label: "Director" },
   { href: "#run-log", label: "Run Log" },
   { href: "#intel", label: "Intel" },
 ] as const;
@@ -110,7 +108,6 @@ export function LifeGameHud({
   onDismissSettlement,
   settlementPreviewHref = null,
 }: LifeGameHudProps) {
-  const [demoDirectiveVisible, setDemoDirectiveVisible] = useState(false);
   const [runLogFilter, setRunLogFilter] = useState<RunLogFilter>("all");
   const boot = useBootSequence(snapshot.health, demo);
   const pulse = useMemo(() => deriveLifeGamePulse(snapshot), [snapshot]);
@@ -326,7 +323,7 @@ export function LifeGameHud({
                   </Button>
                   <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
                     <Link to={demo ? "/auth" : "/coach"}>
-                      Ask Game Master
+                      Open Coach
                     </Link>
                   </Button>
                 </div>
@@ -340,11 +337,11 @@ export function LifeGameHud({
                   No active quest
                 </div>
                 <p className="mt-2 text-sm text-foreground">
-                  Ask the Game Master for one bounded action, or file your first real action.
+                  The Quest Director issues today's directive on the right. Or file your first real action now.
                 </p>
                 <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                   <Button asChild>
-                    <Link to={demo ? "/auth" : "/coach"}>Ask Game Master</Link>
+                    <Link to={demo ? "/auth" : "/coach"}>Open Coach</Link>
                   </Button>
                   <Button asChild variant="outline">
                     <Link to={demo ? "/auth" : "/proof"}>Log first action</Link>
@@ -369,74 +366,15 @@ export function LifeGameHud({
             )}
           </section>
 
-          <section id="gm" className="operator-panel hud-gm p-4">
-            <PanelHeading icon={Bot} eyebrow="Directive channel" title="Game Master" />
-            <div className="mt-4 rounded-sm border border-primary/25 bg-primary/[0.04] p-3">
-              <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-primary">
-                {demo ? "Demo Script" : "Evidence-bound"}
-              </div>
-              <p className="mt-2 text-sm leading-6">
-                One callout. One quest. One required artifact. One next move.
-              </p>
-            </div>
-
-            {demo ? (
-              <div className="mt-3">
-                {demoDirectiveVisible ? (
-                  <div className="space-y-2 rounded-sm border border-border p-3" aria-live="polite">
-                    {DEMO_GAME_MASTER_SCRIPT.map((line) => (
-                      <p key={line} className="font-mono text-[10px] leading-5 text-muted-foreground">
-                        {line}
-                      </p>
-                    ))}
-                    <Button asChild size="sm" className="mt-2">
-                      <Link to="/auth">Ask with your real context</Link>
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => setDemoDirectiveVisible(true)}
-                  >
-                    Run scripted directive
-                  </Button>
-                )}
-              </div>
-            ) : (
-              <>
-                {snapshot.recentGameMasterMessages.length > 0 ? (
-                  <div className="mt-3 space-y-2">
-                    {snapshot.recentGameMasterMessages.map((message) => (
-                      <div key={message.id} className="rounded-sm border border-border p-3">
-                        <p className="line-clamp-2 text-xs text-muted-foreground text-wrap-safe">
-                          {message.directiveLabel}
-                        </p>
-                        <div className="mt-2 font-mono text-[9px] uppercase tracking-widest text-primary">
-                          {message.mode ?? "general"} directive filed
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="mt-3 text-sm text-muted-foreground">
-                    No directives yet. Bring the real bottleneck, not the idealised story.
-                  </p>
-                )}
-                <Button asChild variant="outline" className="mt-4 w-full">
-                  <Link to="/coach">Open Game Master</Link>
-                </Button>
-              </>
-            )}
-
+          <div className="space-y-4">
+            <QuestDirectorPanel demo={demo} />
             <Link
               to={demo ? "/auth" : "/gameforge"}
-              className="mt-3 flex min-h-11 items-center justify-between rounded-sm border border-border px-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:border-primary/40 hover:text-primary"
+              className="flex min-h-11 items-center justify-between rounded-sm border border-border px-3 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:border-primary/40 hover:text-primary"
             >
               Enter Arena <Swords className="h-4 w-4" />
             </Link>
-          </section>
+          </div>
         </div>
 
         <section id="run-log" className="operator-panel mt-4 p-4 sm:p-5">
