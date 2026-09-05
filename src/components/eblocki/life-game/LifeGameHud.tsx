@@ -442,8 +442,8 @@ export function LifeGameHud({
             </p>
           </div>
           <Button asChild variant="outline" className="w-full sm:w-auto">
-            <Link to={demo ? "/auth" : "/dashboard?panel=intel"}>
-              Open Intel <Terminal className="ml-2 h-4 w-4" />
+            <Link to={demo ? "/auth" : "/today"}>
+              Open deeper analysis <Terminal className="ml-2 h-4 w-4" />
             </Link>
           </Button>
         </section>
