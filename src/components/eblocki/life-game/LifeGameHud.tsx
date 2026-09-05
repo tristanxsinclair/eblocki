@@ -8,6 +8,7 @@ import {
   CircleDashed,
   CloudOff,
   Flame,
+  Focus,
   Gauge,
   LockKeyhole,
   Radio,
@@ -19,6 +20,7 @@ import {
   Trophy,
   X,
   Zap,
+  PanelsTopLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuestDirectorPanel } from "@/components/eblocki/life-game/QuestDirectorPanel";
@@ -109,6 +111,14 @@ export function LifeGameHud({
   settlementPreviewHref = null,
 }: LifeGameHudProps) {
   const [runLogFilter, setRunLogFilter] = useState<RunLogFilter>("all");
+  const focusStorageKey = demo ? "eblocki-demo-focus-mode" : "eblocki-focus-mode";
+  const [focusMode, setFocusMode] = useState(() => {
+    try {
+      return sessionStorage.getItem(focusStorageKey) === "1";
+    } catch {
+      return false;
+    }
+  });
   const boot = useBootSequence(snapshot.health, demo);
   const pulse = useMemo(() => deriveLifeGamePulse(snapshot), [snapshot]);
   const settlement = useMemo(
@@ -133,6 +143,18 @@ export function LifeGameHud({
   );
   const degraded = Object.values(snapshot.health).some((value) => value === "error");
 
+  const toggleFocusMode = () => {
+    setFocusMode((current) => {
+      const next = !current;
+      try {
+        sessionStorage.setItem(focusStorageKey, next ? "1" : "0");
+      } catch {
+        // Session persistence is optional; focus mode still works in-memory.
+      }
+      return next;
+    });
+  };
+
   useEffect(() => {
     if (!settlementId) return;
     const timer = window.setTimeout(() => {
@@ -146,7 +168,10 @@ export function LifeGameHud({
   }, [settlementId]);
 
   return (
-    <div className="operator-surface life-game-shell scanlines mobile-safe-page min-h-full">
+    <div
+      className="operator-surface life-game-shell mobile-safe-page min-h-full"
+      data-focus-mode={focusMode ? "true" : "false"}
+    >
       {boot.visible && (
         <div
           className="life-game-boot crt-surface"
@@ -173,17 +198,21 @@ export function LifeGameHud({
           </div>
         )}
 
-        <header id="operator" className="operator-panel-accent p-4 md:p-5">
+        <header id="operator" className="operator-panel-accent mission-hero p-5 md:p-7">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="min-w-0">
               <div className="operator-label flex flex-wrap items-center gap-2">
-                <span className="text-primary">Operator Level {snapshot.operator.level}</span>
-                <span className="text-muted-foreground">//</span>
-                <span className="text-muted-foreground">{snapshot.operator.rank}</span>
+                <span className="mission-status-dot" aria-hidden="true" />
+                <span className="text-primary">Mission control</span>
+                <span className="text-muted-foreground">Operator level {snapshot.operator.level}</span>
+                <span className="text-muted-foreground">· {snapshot.operator.rank}</span>
               </div>
-              <h1 className="operator-heading-2 mt-2">
+              <h1 className="mission-title mt-3">
                 {snapshot.operator.title}
               </h1>
+              <p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+                Your evidence, directives, and earned capability—resolved into one operating picture.
+              </p>
             </div>
 
             <div className="operator-stat-grid lg:min-w-[500px]">
@@ -228,6 +257,15 @@ export function LifeGameHud({
               {command.label}
             </a>
           ))}
+          <button
+            type="button"
+            className="hud-command"
+            aria-pressed={focusMode}
+            onClick={toggleFocusMode}
+          >
+            {focusMode ? <PanelsTopLeft className="h-3 w-3" /> : <Focus className="h-3 w-3" />}
+            {focusMode ? "Overview" : "Focus"}
+          </button>
           <Link to={demo ? "/auth" : "/gameforge"} className="hud-command hud-command-primary">
             Arena <Swords className="h-3 w-3" />
           </Link>

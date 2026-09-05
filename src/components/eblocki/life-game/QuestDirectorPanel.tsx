@@ -68,13 +68,13 @@ function QuestCard({ quest, demo }: { quest: PersonalisedQuest; demo?: boolean }
     ? "/auth"
     : `/proof?source=quest&mode=${encodeURIComponent(quest.modeId ?? quest.modeKey)}`;
   return (
-    <div className="rounded-sm border border-border bg-background/40 p-3 transition-colors hover:border-primary/40">
+    <article className="mission-directive-card border p-4 transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 hover:border-white/[0.14]">
       <div className="flex flex-wrap items-center gap-2 font-mono text-[9px] uppercase tracking-[0.18em]">
         <span className="text-primary">{ORIGIN_COPY[quest.origin]}</span>
         <span className="text-muted-foreground">// {STAGE_COPY[quest.stage]}</span>
         {quest.domain && <span className="text-muted-foreground">// {quest.domain}</span>}
       </div>
-      <p className="mt-2 text-sm font-medium leading-6 text-wrap-safe">{quest.title}</p>
+      <p className="mt-2.5 text-[15px] font-semibold leading-6 tracking-[-0.01em] text-wrap-safe">{quest.title}</p>
       <div className="mt-2 flex flex-wrap items-center gap-3 font-mono text-[10px] text-muted-foreground">
         <span className="inline-flex items-center gap-1">
           <Gauge className="h-3 w-3" /> R{quest.resistance_level}
@@ -90,13 +90,13 @@ function QuestCard({ quest, demo }: { quest: PersonalisedQuest; demo?: boolean }
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="mt-2 inline-flex min-h-9 items-center gap-1 font-mono text-[10px] uppercase tracking-widest text-muted-foreground hover:text-primary"
+        className="mt-3 inline-flex min-h-9 items-center gap-1 text-xs font-medium text-muted-foreground hover:text-primary"
         aria-expanded={open}
       >
         Standard <ChevronDown className={cn("h-3 w-3 transition-transform", open && "rotate-180")} />
       </button>
       {open && (
-        <div className="mt-2 space-y-2 border-l border-border pl-3 text-xs text-muted-foreground">
+        <div className="mt-2 space-y-2 border-l border-primary/20 pl-3 text-xs leading-5 text-muted-foreground">
           <p className="text-wrap-safe">
             <span className="text-foreground">Evidence required: </span>
             {quest.required_artifact}
@@ -121,17 +121,17 @@ function QuestCard({ quest, demo }: { quest: PersonalisedQuest; demo?: boolean }
           Log this proof <ArrowRight className="ml-1.5 h-3 w-3" />
         </Link>
       </Button>
-    </div>
+    </article>
   );
 }
 
 function Brief({ brief }: { brief: QuestBrief }) {
   return (
-    <div className="rounded-sm border border-primary/25 bg-primary/[0.04] p-3">
+    <div className="mission-brief rounded-xl border border-primary/15 bg-primary/[0.035] p-4">
       <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-primary">
         Read of your record
       </div>
-      <p className="mt-2 text-sm leading-6 text-wrap-safe">{brief.headline}</p>
+      <p className="mt-2 text-[15px] font-medium leading-6 tracking-[-0.01em] text-wrap-safe">{brief.headline}</p>
       <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
         Resistance band {brief.band.min}–{brief.band.max} // {brief.band.note}
       </p>
@@ -140,7 +140,7 @@ function Brief({ brief }: { brief: QuestBrief }) {
           {brief.signals.slice(0, 5).map((signal) => (
             <li
               key={signal}
-              className="rounded-sm border border-border px-1.5 py-0.5 font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
+              className="rounded-full border border-white/[0.08] bg-white/[0.025] px-2 py-1 font-mono text-[9px] uppercase tracking-wider text-muted-foreground"
             >
               {signal}
             </li>
@@ -169,18 +169,20 @@ export function QuestDirectorPanel({ demo }: { demo?: boolean }) {
   const loading = demo ? false : live.loading;
 
   return (
-    <section id="director" className="operator-panel hud-gm p-4">
-      <div className="flex items-center gap-2">
-        <Crosshair className="h-4 w-4 text-primary" />
+    <section id="director" className="operator-panel mission-director hud-gm p-4 sm:p-5">
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl border border-primary/15 bg-primary/[0.07] text-primary">
+          <Crosshair className="h-4 w-4" />
+        </div>
         <div>
           <div className="font-mono text-[9px] uppercase tracking-[0.2em] text-muted-foreground">
             Directive engine
           </div>
-          <h2 className="font-mono text-sm uppercase tracking-widest">Quest Director</h2>
+          <h2 className="text-lg font-semibold tracking-tight">Quest Director</h2>
         </div>
       </div>
 
-      <div className="mt-4 space-y-3">
+      <div className="mt-5 space-y-3">
         {loading ? (
           <div className="space-y-2" aria-live="polite">
             <div className="h-16 animate-pulse rounded-sm border border-border bg-muted/30" />
