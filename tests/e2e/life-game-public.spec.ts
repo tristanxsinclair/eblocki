@@ -1,6 +1,24 @@
 import { expect, test } from "@playwright/test";
 
 test.describe("public life-game settlement replay", () => {
+  test("presents the full life game on mobile without horizontal overflow", async ({ page }) => {
+    await page.goto("/");
+
+    await expect(
+      page.getByRole("heading", { name: "Your life. Turned into a game you can prove." }),
+    ).toBeVisible();
+    await expect(page.getByText("A learning path with consequences.")).toBeVisible();
+    await expect(page.getByText("More than a proof form. Your operating system.")).toBeVisible();
+    await expect(page.getByText("The game cannot award itself.")).toBeVisible();
+
+    const overflow = await page.evaluate(
+      () =>
+        Math.max(document.documentElement.scrollWidth, document.body.scrollWidth) >
+        document.documentElement.clientWidth,
+    );
+    expect(overflow).toBe(false);
+  });
+
   test("reveals committed verdict and XP, stays contained, and dismisses cleanly", async ({
     page,
   }) => {
