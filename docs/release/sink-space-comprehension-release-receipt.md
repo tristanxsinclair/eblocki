@@ -2,108 +2,104 @@
 
 Date: 2026-09-05 (Australia/Perth)
 
-Status: **CONTROLLED GITHUB RELEASE COMPLETE — CANONICAL AND AUTHENTICATED EVIDENCE INCOMPLETE**
+Status: **RELEASED — CANONICAL PUBLICATION AND AUTHENTICATED PROOF LOOP VERIFIED**
 
-## Durable source identity
+## Durable source and release identity
 
 - Repository: `tristanxsinclair/www.eblocki.space`
-- Implementation commit: `51461b83cff1b91ffc8d24a30c9b804e65b80a2f`
-- Pull request: [#112](https://github.com/tristanxsinclair/www.eblocki.space/pull/112)
-- Protected-main merge commit: `ee3481ee38dab05a0dbad2f9bb51d5efc1dd6e22`
-- Required checks passed before merge: `Verify product`, `Test, build, and lint`, and `Playwright (mobile-chromium)`
-- Additional Datadog build check passed.
+- Product implementation commit: `51461b83cff1b91ffc8d24a30c9b804e65b80a2f`
+- Product pull request: [#112](https://github.com/tristanxsinclair/www.eblocki.space/pull/112)
+- Product protected-main merge: `ee3481ee38dab05a0dbad2f9bb51d5efc1dd6e22`
+- Release compatibility commit: `e6b37e05307679d99df4ba3d3a9211febc90e8b7`
+- Release compatibility pull request: [#114](https://github.com/tristanxsinclair/www.eblocki.space/pull/114)
+- Published protected-main merge: `a2da9bf1fcf46477b8a19287859665ae713240ff`
+- Lovable production build ID: `a2da9bf1fcf4-20260905054929`
+- Lovable build timestamp shown in production Settings: `2026-09-05 13:49:29` Australia/Perth
+- Lovable environment shown in production Settings: `production`
 
-## What shipped in source
+The release compatibility patch prevents established users with legacy `completed_onboarding` state from being bounced from the dashboard to Welcome. New first-use users still enter the Welcome flow. Dashboard profile lookup failures fail open rather than trapping authenticated users. Regression coverage was added for both states.
 
-- The public and first-use journeys now explain the university-work loop as work -> verdict -> gap -> correction.
+## What shipped
+
+- The public and first-use journeys explain the university-work loop as work -> verdict -> gap -> correction.
 - Advanced operating-profile setup no longer blocks the first proof submission.
 - Verdict copy distinguishes observed evidence, inferred assessment, and recommended correction.
 - Privacy-safe activation events cover artifact submission, correction start, and second-attempt submission without artifact or verdict text.
-- Existing proof scoring, Court, XP, payments, database schema, and Supabase functions were not replaced or duplicated.
+- Existing proof scoring, Court, XP, payments, database schema, and Supabase functions were preserved rather than replaced or duplicated.
 
-## Local clean-tree verification
+## Verification gates
 
-Verification was repeated after the implementation commit, starting and ending with an empty `git status --porcelain`.
+Verification was run on the committed release compatibility branch before protected merge.
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Clean install | PASS | `npm ci`; 645 packages installed from the committed lockfile |
-| Tests | PASS | 52 files, 377 tests |
+| Tests | PASS | 52 files, 379 tests |
 | TypeScript | PASS | `npx tsc -p tsconfig.app.json --noEmit` |
-| Eblocki lint ratchet | PASS | `npm run lint:eblocki`; no warnings or errors |
+| Eblocki lint ratchet | PASS | no warnings or errors |
 | Full lint | PASS WITH DEBT | 0 errors and 12 pre-existing warnings outside this upgrade |
-| Production build | PASS | Vite 5.4.21; 1,979 modules transformed |
-| Build mutation check | PASS | `supabase/functions/mcp/index.ts` SHA-256 remained `A3DE4B6E9D268CE0583342613B44AADEF325F7E6388D4E565AD29117928C67E0` before and after build |
-| Bundle guard | PASS | 1,538.3 KB JS / 1,611.3 KB budget; 107.3 KB CSS / 117.2 KB budget |
+| Production build | PASS | Vite 5.4.21; tracked MCP function unchanged |
+| Bundle guard | PASS | within the committed JS and CSS budgets |
 | Route smoke | PASS | 17/17 SPA routes returned HTTP 200 |
 | Production-high audit gate | PASS | `npm audit --omit=dev --audit-level=high` exited 0 |
+| Pull-request checks | PASS | Verify product, Test/build/lint, mobile Playwright, and Datadog build |
+| Main CI | PASS | [run 33948176514](https://github.com/tristanxsinclair/www.eblocki.space/actions/runs/33948176514) |
+| Main GitHub Pages | PASS | [run 33948176506](https://github.com/tristanxsinclair/www.eblocki.space/actions/runs/33948176506) |
+| Main Datadog workflow | PASS | [run 33948176489](https://github.com/tristanxsinclair/www.eblocki.space/actions/runs/33948176489) |
 
-The Windows build mutation was isolated in `vite.config.ts`. `@lovable.dev/mcp-js` 0.20.x receives an absolute drive-letter path on Windows and can replace the tracked MCP function with an unresolved wrapper. Normal Windows builds now retain the reviewed generated function. Linux CI and Lovable builds still run MCP generation; `EBLOCKI_FORCE_MCP_GENERATION=true` provides an explicit Windows opt-in for validating an upstream fix.
+The Windows build mutation remains isolated in `vite.config.ts`. `@lovable.dev/mcp-js` 0.20.x can replace the tracked MCP function when given a Windows drive-letter path. Normal Windows builds retain the reviewed generated function. Linux CI and Lovable builds still run MCP generation; `EBLOCKI_FORCE_MCP_GENERATION=true` is the explicit Windows opt-in for validating an upstream fix.
 
 ## Advisory classification
 
 `npm audit fix` was run without `--force`; it applied only non-breaking transitive patches and reduced the report from 9 findings (3 high, 6 moderate) to 4 findings (1 high, 3 moderate).
 
-- Patched: `browserslist` build-tool advisories and `fast-uri` transitive runtime advisory.
-- Remaining high: the Vite/esbuild Windows development-server file-read path. Vite is a development/build dependency and is not included in the deployed browser runtime. Automatic remediation requires the breaking Vite 8 upgrade.
+- Patched: `browserslist` build-tool advisories and the `fast-uri` transitive runtime advisory.
+- Remaining high: the Vite/esbuild development-server file-read path. Vite is a development/build dependency and is not included in the deployed browser runtime. Automatic remediation requires the breaking Vite 8 upgrade.
 - Remaining moderate: Vite/esbuild development-server request exposure and two React Router advisories. React Router remediation requires a deliberate v7 migration.
 - Decision: do not run `npm audit fix --force`; schedule Vite 8 and React Router 7 as compatibility work with Lovable, Capacitor, routing, and browser regression coverage.
 
-## Performance and visual evidence
+## Canonical publication evidence
 
-- The bundle-size guard passes, but mobile-profile Lighthouse on the local production build measured performance 38, accessibility 94, best practices 100, and SEO 100.
-- Mobile metrics: FCP 4,175 ms, LCP 7,440 ms, TBT 2,016 ms, CLS 0.0195, TTI 8,151 ms.
-- This is observed local synthetic evidence, not real-user monitoring. It blocks an unqualified wider-distribution performance claim, but did not prevent this controlled source/Pages release.
-- Verified local upgraded landing screenshot: [local-verified-desktop.png](./screenshots/sink-space-upgrade/local-verified-desktop.png) at 1281x720 with no horizontal overflow.
-- Canonical pre-publication screenshot: [canonical-pre-lovable-publish.png](./screenshots/sink-space-upgrade/canonical-pre-lovable-publish.png). It records that the custom domain still served the prior hero after the GitHub deployment.
+Lovable was explicitly published after protected main reached `a2da9bf1fcf46477b8a19287859665ae713240ff`.
 
-## Controlled deployment identity
+The cache-bypassed canonical URL `https://eblocki.space/?release=a2da9bf&receipt=final` was inspected after publication:
 
-GitHub Pages workflow run [33947108601](https://github.com/tristanxsinclair/www.eblocki.space/actions/runs/33947108601) completed successfully from the merge commit.
+- Page title: `Eblocki — Improve from the work you actually produce`
+- New hero `Improve from the work you actually produce`: present
+- Prior hero `Turn your life into a game you can win`: absent
+- Production Settings commit: `a2da9bf1fcf4`
+- Production Settings build ID: `a2da9bf1fcf4-20260905054929`
 
-- Deployment ID: `6277511626`
-- Deployment environment: `github-pages`
-- Commit SHA: `ee3481ee38dab05a0dbad2f9bb51d5efc1dd6e22`
-- Build ID: `github-pages-33947108601-1`
-- Build timestamp: `2026-09-05T05:24:34.417Z`
-- Built main asset: `assets/index-KxASu_Tu.js`
-- Downloaded Pages artifact SHA-256: `B8348090CB2663D802273183A189C61EE5046AC1480E108602303CA7986123EE`
-
-The downloaded deployment artifact was inspected and contains the exact commit SHA, build ID, timestamp, and `github-pages` environment above. This proves what GitHub built and deployed.
-
-## Canonical production truth
-
-`https://eblocki.space/?release=ee3481e` was cache-bypassed and inspected after the Pages deployment. It still rendered the prior `Stop fake productivity. Turn effort into proof.` experience rather than the new `Improve from the work you actually produce.` experience.
-
-Therefore:
-
-- GitHub Pages deployment: **VERIFIED**.
-- Lovable/custom-domain publication: **NOT COMPLETE**.
-- Canonical deployed build identity: **does not yet match main**.
-- No claim is made that the public Eblocki product has shipped this upgrade.
+Evidence: [canonical-published.png](./screenshots/sink-space-upgrade/canonical-published.png). The earlier [canonical-pre-lovable-publish.png](./screenshots/sink-space-upgrade/canonical-pre-lovable-publish.png) remains as the before-state showing why the Lovable publication step was required.
 
 ## Authenticated proof-to-correction loop
 
-The production `/proof` route redirected to `/auth`. The available in-app browser had no Eblocki or Lovable session, no connected Chrome session was available, and the host had no `E2E_TEST_USER_EMAIL`, `E2E_TEST_USER_PASSWORD`, `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ACCESS_TOKEN`, or saved Playwright auth state.
+The owner-authenticated canonical production application was exercised without creating a test account or extracting credentials, session storage, cookies, or tokens.
 
-No account was invented, no production user was seeded, and no credentials were extracted. Consequently these required artifacts are still missing:
+1. Submitted `Release QA: canonical publication receipt` in Sink Space as `implementation proof`.
+2. Production returned and persisted a moderate `6/10` verdict with a product-system standard gap and the correction `Implement or test the corrected logic before claiming identity-level progress.`
+3. Opened the verdict's `Submit corrected attempt` path and observed the correction form prefilled from the first verdict.
+4. Submitted `Corrected attempt: Release QA: canonical publication receipt` with the exact protected-main revision, compatibility correction, verification gates, Lovable build identity, reflection, and next upgrade.
+5. Production returned an elite `9/10` verdict, `Counted`, and `Strong enough to close today.`
+6. Navigated away to `/dashboard`, then re-opened `/proof`. The dashboard showed the corrected attempt as the latest elite proof, and proof history showed exactly one corrected `9/10` record beside the original `6/10` record.
 
-- first artifact persisted record ID;
-- first verdict persisted record and screenshot;
-- correction-start screenshot;
-- second-attempt persisted record ID;
-- proof that the second attempt links correctly without duplicate settlement.
+Privacy-safe evidence:
 
-## Migration readiness
+- [04-corrected-verdict.png](./screenshots/sink-space-upgrade/authenticated/04-corrected-verdict.png)
+- [05-dashboard-persistence.png](./screenshots/sink-space-upgrade/authenticated/05-dashboard-persistence.png)
+- [06-proof-history-persisted.png](./screenshots/sink-space-upgrade/authenticated/06-proof-history-persisted.png)
 
-This upgrade contains no schema migration and no generated Supabase type change. Production schema and Edge Function alignment were not queried because read-only Supabase access was unavailable. Local migration files are not deployment evidence.
+The production UI does not expose artifact or verdict row IDs. Database identifiers and an explicit parent-child correction foreign key were therefore not claimed. The visible application state proves two distinct persisted artifacts, the score change from 6/10 to 9/10, and a single visible corrected record; it does not substitute for a direct database-integrity query.
 
-## Exact closure sequence
+## Performance and remaining risks
 
-1. In an owner-authenticated Lovable session, sync/publish main merge `ee3481ee38dab05a0dbad2f9bb51d5efc1dd6e22`.
-2. Re-open `https://eblocki.space` with a cache-bypass query and confirm the new hero plus the compiled build identity.
-3. Sign in with an approved test or owner account and run submission -> verdict persistence -> correction -> second attempt.
-4. Record both artifact IDs, verdict/settlement linkage, timestamps, and screenshots without exposing private artifact content or tokens.
-5. Run a mobile Lighthouse or field-performance pass on the canonical build before App Store or broad distribution.
+- The bundle-size guard passes, but local mobile-profile Lighthouse measured performance 38, accessibility 94, best practices 100, and SEO 100. Mobile metrics were FCP 4,175 ms, LCP 7,440 ms, TBT 2,016 ms, CLS 0.0195, and TTI 8,151 ms.
+- This is local synthetic evidence, not real-user monitoring. It blocks an unqualified App Store or broad-distribution performance claim, not this controlled web release.
+- This upgrade contains no schema migration and no generated Supabase type change. Production schema and Edge Function alignment were not queried through a privileged database channel. Local migration files are not deployment evidence.
+- Lovable still reports one reviewed security finding for a public `SECURITY DEFINER` audit-receipt lookup guarded by its share token. It was not changed as part of this release.
+- Direct canonical JavaScript asset inspection was blocked by the browser client. The canonical page content plus the production Settings commit/build card provide the deployed build identity used here.
 
-Until those steps are recorded, the honest release verdict remains: **CODE AND CONTROLLED DEPLOYMENT COMPLETE — CANONICAL/AUTHENTICATED PROOF RECEIPT INCOMPLETE**.
+## Final verdict
+
+**SHIPPED — CANONICAL BUILD VERIFIED — AUTHENTICATED PROOF RECEIPT COMPLETE**
+
+The wider-distribution performance gate and privileged Supabase schema/Edge alignment remain explicitly unverified and should be handled as separate release-hardening work, not folded into another redesign.
