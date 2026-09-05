@@ -43,7 +43,7 @@ import {
 } from "@/lib/eblocki/dashboard-view-model";
 import { mobileRecentProofLimit } from "@/lib/eblocki/mobile-disclosure";
 import { logEvent } from "@/lib/eblocki/analytics";
-import { buildProofEntryHref } from "@/lib/eblocki/first-proof";
+import { buildProofEntryHref, shouldOpenWelcome } from "@/lib/eblocki/first-proof";
 import { isSameLocalDay, localDayKey } from "@/lib/eblocki/local-day";
 import { ProofWeekPanel } from "@/components/eblocki/ProofWeekPanel";
 import { ProofClosureCard } from "@/components/eblocki/ProofClosureCard";
@@ -99,13 +99,16 @@ export default function Dashboard() {
     if (!user) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from("user_onboarding_profiles")
-        .select("seen_welcome")
+        .select("seen_welcome, completed_onboarding")
         .eq("user_id", user.id)
         .maybeSingle();
       if (cancelled) return;
-      setWelcomeCheck(data?.seen_welcome ? "ok" : "needs");
+      // Legacy users may have completed the original setup before
+      // `seen_welcome` existed. Treat that durable completion as equivalent,
+      // and fail open on profile-read errors so returning users keep access.
+      setWelcomeCheck(!error && shouldOpenWelcome(data) ? "needs" : "ok");
     })();
     return () => { cancelled = true; };
   }, [user]);
