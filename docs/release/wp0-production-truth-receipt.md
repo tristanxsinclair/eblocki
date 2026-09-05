@@ -2,17 +2,19 @@
 
 ## Verdict
 
-**BLOCKED — external deployment, production schema/runtime, and authenticated-loop evidence are missing.**
+**BLOCKED — canonical production now matches merged main, but production schema/runtime and authenticated-loop evidence remain missing.**
 
 ## Repository
 
 - Repository: `tristanxsinclair/www.eblocki.space`
-- Branch: `codex/wp0-production-truth`
-- Inspected base HEAD SHA: `6ab937ce806a3e67e3d420706afd9b332db64ebb`
-- Base commit: `Merge pull request #110 from tristanxsinclair/codex/eblocki-sophistication`
+- Verification branch: `codex/wp0-main-receipt`, created directly from `origin/main`
+- Main HEAD SHA: `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3`
+- Main commit: `Merge pull request #111 from tristanxsinclair/codex/wp0-production-truth`
 - WP0 implementation commit: `c991de409e0479767281886590c5b32d22c8672b`
-- Working tree: clean after focused commits
-- Remote status: `codex/wp0-production-truth` pushed; draft PR #111 targets `main`
+- WP0 receipt update commit: `1b6fcb251f4a735213cd65ee04e1af04a39db861`
+- PR #111 merged: yes, at `2026-08-11T04:38:52Z`
+- Working tree before this receipt update: clean
+- Remote status: `origin/main` at the merge commit above
 
 ## Build identity
 
@@ -63,30 +65,33 @@ Corrections:
 | Route smoke | preview on `127.0.0.1:4172`; `npm run smoke:routes` | PASS | 17/17 routes returned HTTP 200 |
 | Bundle guardrail | `npm run perf:bundle-size` | PASS | all JS/CSS chunks within repository budgets |
 | Production audit | `npm audit --omit=dev --audit-level=high` | PASS | no high production finding; two moderate React Router advisories remain and require a breaking v7 upgrade |
-| CI | GitHub PR #111 checks for `c991de4` | PASS | Verify product, test/build/lint, mobile Playwright, and Pages build all passed; Supabase Preview skipped |
+| CI | GitHub Actions for main SHA `93b118c` | PASS | CI, GitHub Pages, and Datadog workflows completed successfully |
 
 ## Supabase alignment
 
+- Read-only access check (post-publication WP0 pass): `SUPABASE_ACCESS_TOKEN` was absent in both the sandbox and approved host process. The production project reference resolved from `supabase/config.toml`. No database or Management API query was attempted without the credential.
 - Local schema: `proof_artifacts` drives the `cle_after_proof_insert` trigger; the May 20 CLE migration creates `xp_events`, `court_verdicts`, `domain_levels`, `operator_level`, and `identity_ledger`.
 - Generated types: contain the proof, verdict, XP, ledger, commitment, objective, operator, and domain structures read by current source.
 - Frontend writes: `Proof.tsx` inserts the generated `proof_artifacts` fields, then links commitments/objectives using ownership and null guards.
 - CLE: Postgres creates the authoritative verdict, XP event, ledger entry, and progression updates after artifact insert. `court_verdicts.proof_id` is already a primary key.
 - Duplicate protection: the WP0 migration adds a partial unique index on `xp_events(proof_id)` for non-null proof IDs. Court is one-per-proof; commitment/objective closure is guarded; multiple ledger kinds for one proof remain intentional.
-- Production state: **UNVERIFIED**. Local migration files are not deployment evidence.
-- Edge functions: local Coach and support functions were inspected; deployed source/version could not be matched.
+- Production state: **UNVERIFIED**. The promised read-only Supabase access token was not present in the runtime; local migration files are not deployment evidence.
+- Edge functions: **UNVERIFIED**. Local Coach and support functions were inspected, but the environment has no deployment access with which to match source to the deployed versions.
 
 Verdict: **UNVERIFIED**
 
 ## Production identity
 
 - Canonical URL: `https://eblocki.space`
-- Expected SHA: WP0 candidate commit not yet published
-- Live SHA: unavailable
-- Expected build ID: generated when the candidate is built by the publisher
-- Live build ID: unavailable
-- Repo → live: **UNVERIFIED**
+- Expected SHA: `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3`
+- Live SHA: `93b118ca8e349e83cb17fc8fd1cdf2975fd142d3`
+- Live build ID: `93b118ca8e34-20260811043923`
+- Live build timestamp: `2026-08-11T04:39:23.746Z`
+- Live environment: `production`
+- Live app version: `0.0.0`
+- Main → live: **MATCH**
 
-Observed on 11 August 2026 (Australia/Perth): the public landing page loaded. Navigating to `/settings` redirected to `/auth`, and the live signed-out surface exposed no build identity.
+Publication history on 11 August 2026 (Australia/Perth): WP0 was initially blocked by the unmerged PR, then by canonical production serving pre-WP0 bundle `assets/index-CseAZrM0.js`. After the user manually republished through Lovable, a cache-bypassed retrieval served new bundle `assets/index-DjGr7P_P.js` (996,517 bytes). Its compiled build contract contains the exact main SHA, build ID, UTC timestamp, production environment, and app version recorded above. The Settings card remains protected; navigating to `/settings` redirected to `/auth` because no legitimate session was available.
 
 ## Authenticated production evidence loop
 
@@ -107,10 +112,9 @@ Status: **NOT OBSERVED**
 
 ## Remaining blockers
 
-- WP0 candidate is committed, pushed, and green in CI, but is not merged or published to canonical production.
+- The read-only `SUPABASE_ACCESS_TOKEN` is not present in the Codex runtime, so production catalog and deployed Edge Function metadata cannot be inspected.
 - The new XP uniqueness migration is not verified as applied in production.
 - Production Supabase schema and Edge Function versions cannot be matched to repository source with current access.
-- Canonical production exposes no SHA/build ID that can be matched to the candidate.
 - No legitimate authenticated production session was available for the real evidence-settlement loop.
 
 ## Evidence limitations
@@ -122,4 +126,4 @@ Status: **NOT OBSERVED**
 
 ## Final WP0 decision
 
-WP0 is **BLOCKED**. Local source/build verification passes, but canonical production identity, production Supabase/runtime alignment, and an authenticated non-duplicating settlement loop remain unobserved. WP1 must not begin.
+WP0 is **BLOCKED**. Merged main and canonical production now match through the deployed build identity contract. Production Supabase/runtime alignment and an authenticated non-duplicating settlement loop remain unobserved, so XP idempotency is not yet proven in production. WP1 must not begin.

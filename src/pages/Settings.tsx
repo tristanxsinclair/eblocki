@@ -146,7 +146,7 @@ export default function Settings() {
     if (!user) return;
     const { error } = await supabase.from("user_onboarding_profiles").upsert({ user_id: user.id, completed_onboarding: false }, { onConflict: "user_id" });
     if (error) return toast.error(error.message);
-    toast.success("Onboarding reset. You can rerun Setup OS.");
+    toast.success("Advanced setup reset. You can run it again from Areas.");
   };
 
   const exportProfile = () => {
@@ -238,7 +238,7 @@ export default function Settings() {
               <span className="font-mono text-[10px] uppercase tracking-widest text-primary">Personalised Eblocki OS</span>
               <h2 className="text-xl font-semibold mt-2 break-words">Onboarding profile</h2>
             </div>
-            <Button variant="outline" onClick={resetOnboarding}>Reset onboarding</Button>
+            <Button variant="outline" onClick={resetOnboarding}>Reset advanced setup</Button>
           </div>
 
           <div className="grid gap-4">
@@ -283,7 +283,7 @@ export default function Settings() {
 
           <div className="flex flex-col sm:flex-row sm:justify-between gap-3 pt-3">
             <Button variant="secondary" onClick={exportProfile} className="w-full sm:w-auto">Export profile JSON</Button>
-            <Button onClick={saveProfile} disabled={savingProfile} className="w-full sm:w-auto">{savingProfile ? "Saving…" : "Save onboarding profile"}</Button>
+            <Button onClick={saveProfile} disabled={savingProfile} className="w-full sm:w-auto">{savingProfile ? "Saving…" : "Save operating profile"}</Button>
           </div>
         </Card>
 
@@ -299,7 +299,7 @@ export default function Settings() {
           <div className="space-y-4">
             {modes.length === 0 ? (
               <div className="rounded-sm border border-border p-4 text-sm text-muted-foreground">
-                No personalised modes yet. Open Setup OS or add a mode in the Modes page.
+                No personalised modes yet. Open advanced setup or add an area in the Areas page.
               </div>
             ) : (
               modes.map((mode) => {

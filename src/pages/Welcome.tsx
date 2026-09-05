@@ -4,7 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { ArrowRight, Check, ShieldCheck, Sparkles, Target } from "lucide-react";
+import { ArrowRight, Check, ShieldCheck, Target } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { logEvent } from "@/lib/eblocki/analytics";
@@ -12,9 +12,8 @@ import { Seo } from "@/components/Seo";
 import { EblockiLogo } from "@/components/eblocki/EblockiLogo";
 
 /**
- * Short, premium welcome flow. Five steps, <2 minutes, ends by seeding
- * the user's selected modes and goals, then sending them straight to the
- * first-proof flow.
+ * Short activation flow. It introduces the proof loop, optionally seeds an
+ * academic focus, then sends the user directly to the first artifact.
  */
 
 const MODE_BANK = [
@@ -27,22 +26,13 @@ const MODE_BANK = [
   { id: "GENERAL_EXECUTION", name: "General", line: "Resisted tasks, real artifacts." },
 ];
 
-const GOAL_BANK = [
-  "Reduce avoidance",
-  "Improve consistency",
-  "Increase deep work",
-  "Stop fake productivity",
-  "Improve study structure",
-];
-
-const STEPS = ["Philosophy", "Modes", "Goals", "First proof", "Momentum"] as const;
+const STEPS = ["The loop", "Your focus", "First work"] as const;
 
 export default function Welcome() {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [step, setStep] = useState(0);
   const [selectedModes, setSelectedModes] = useState<string[]>([]);
-  const [selectedGoals, setSelectedGoals] = useState<string[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -55,9 +45,8 @@ export default function Welcome() {
 
   const canAdvance = useMemo(() => {
     if (step === 1) return selectedModes.length > 0;
-    if (step === 2) return selectedGoals.length > 0;
     return true;
-  }, [step, selectedModes, selectedGoals]);
+  }, [step, selectedModes]);
 
   const toggle = (list: string[], v: string, setter: (n: string[]) => void) => {
     setter(list.includes(v) ? list.filter((x) => x !== v) : [...list, v]);
@@ -87,7 +76,6 @@ export default function Welcome() {
         .upsert(
           {
             user_id: user.id,
-            goals: selectedGoals,
             seen_welcome: true,
           },
           { onConflict: "user_id" },
@@ -139,11 +127,7 @@ export default function Welcome() {
         {step === 1 && (
           <ModesStep selected={selectedModes} toggle={(v) => toggle(selectedModes, v, setSelectedModes)} />
         )}
-        {step === 2 && (
-          <GoalsStep selected={selectedGoals} toggle={(v) => toggle(selectedGoals, v, setSelectedGoals)} />
-        )}
-        {step === 3 && <FirstProofStep />}
-        {step === 4 && <MomentumStep />}
+        {step === 2 && <FirstProofStep />}
 
         <div className="flex items-center justify-between gap-3 pt-2">
           <Button
@@ -182,13 +166,13 @@ function PhilosophyStep() {
   return (
     <Card className="panel p-5 sm:p-7 space-y-5">
       <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">
-        Welcome
+        The proof loop
       </span>
       <h1 className="text-2xl sm:text-3xl font-semibold leading-tight">
-        Welcome. Here is the loop.
+        Turn one piece of work into a better next attempt.
       </h1>
       <p className="text-sm text-muted-foreground">
-        Eblocki helps you submit one piece of real work, see if it counted, and get the next step.
+        Eblocki is for university work you can show: an essay paragraph, IRAC answer, study notes, or a past-paper response.
       </p>
       <ol className="space-y-2 pt-2 text-sm">
         {bullets.map((b, i) => (
@@ -209,9 +193,9 @@ function ModesStep({ selected, toggle }: { selected: string[]; toggle: (v: strin
         <Target className="h-4 w-4 text-primary" />
         <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Modes</span>
       </div>
-      <h2 className="text-xl sm:text-2xl font-semibold">Pick the arenas that matter.</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold">What kind of work will you improve first?</h2>
       <p className="text-sm text-muted-foreground">
-        Pick at least one area you want Eblocki to judge well. You can change this later.
+        Pick at least one focus so the verdict uses a useful standard. You can change this later.
       </p>
       <div className="grid sm:grid-cols-2 gap-2 pt-2">
         {MODE_BANK.map((m) => {
@@ -239,37 +223,6 @@ function ModesStep({ selected, toggle }: { selected: string[]; toggle: (v: strin
   );
 }
 
-function GoalsStep({ selected, toggle }: { selected: string[]; toggle: (v: string) => void }) {
-  return (
-    <Card className="panel p-5 sm:p-7 space-y-4">
-      <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Behavioural goals</span>
-      <h2 className="text-xl sm:text-2xl font-semibold">What are you trying to fix?</h2>
-      <p className="text-sm text-muted-foreground">
-        These help Eblocki shape your first-week guidance. Pick at least one.
-      </p>
-      <div className="grid gap-2 pt-2">
-        {GOAL_BANK.map((g) => {
-          const on = selected.includes(g);
-          return (
-            <button
-              key={g}
-              type="button"
-              onClick={() => toggle(g)}
-              className={cn(
-                "text-left rounded-md border p-3 transition-all touch-manipulation flex items-center justify-between",
-                on ? "border-primary bg-primary/5" : "border-border hover:border-primary/40",
-              )}
-            >
-              <span className="text-sm">{g}</span>
-              {on && <Check className="h-3.5 w-3.5 text-primary" />}
-            </button>
-          );
-        })}
-      </div>
-    </Card>
-  );
-}
-
 function FirstProofStep() {
   return (
     <Card className="panel p-5 sm:p-7 space-y-4">
@@ -277,60 +230,28 @@ function FirstProofStep() {
         <ShieldCheck className="h-4 w-4 text-primary" />
         <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">First proof</span>
       </div>
-      <h2 className="text-xl sm:text-2xl font-semibold">What happens when you submit proof?</h2>
+      <h2 className="text-xl sm:text-2xl font-semibold">Your first useful result is one verdict.</h2>
       <ol className="space-y-2.5 text-sm">
         <li className="flex gap-3">
           <span className="font-mono text-primary">01</span>
-          <span>Press Submit first proof.</span>
+          <span>Paste or attach the work itself.</span>
         </li>
         <li className="flex gap-3">
           <span className="font-mono text-primary">02</span>
-          <span>Paste the work itself — a paragraph, corrected answer, notes, or a shipped change.</span>
+          <span>See what the artifact demonstrates.</span>
         </li>
         <li className="flex gap-3">
           <span className="font-mono text-primary">03</span>
-          <span>Eblocki tells you what counted and what was weak or missing.</span>
+          <span>Read the most important gap and the evidence behind it.</span>
         </li>
         <li className="flex gap-3">
           <span className="font-mono text-primary">04</span>
-          <span>Go back to Today for your next command.</span>
+          <span>Start the correction and submit the stronger attempt.</span>
         </li>
       </ol>
       <p className="text-[11px] text-muted-foreground italic border-l-2 border-primary/40 pl-2">
-        Goal: one real proof in your first session. Five minutes is enough.
+        Your work is stored as part of your private proof history under the app&apos;s existing account and data controls.
       </p>
     </Card>
-  );
-}
-
-function MomentumStep() {
-  return (
-    <Card className="panel p-5 sm:p-7 space-y-4">
-      <div className="flex items-center gap-2">
-        <Sparkles className="h-4 w-4 text-primary" />
-        <span className="font-mono text-[10px] uppercase tracking-[0.22em] text-primary">Momentum</span>
-      </div>
-      <h2 className="text-xl sm:text-2xl font-semibold">Momentum is earned, not faked.</h2>
-      <p className="text-sm text-muted-foreground">
-        Your momentum score combines three things — none of them are activity:
-      </p>
-      <div className="space-y-2 pt-1">
-        <Row label="Proof quality" body="Depth of the artifacts you produce." />
-        <Row label="Consistency" body="Days you defend the standard, not days you log in." />
-        <Row label="Resistance" body="Hard tasks attempted, not easy wins stacked." />
-      </div>
-      <p className="text-[11px] text-muted-foreground italic">
-        Shallow streaks get flagged. Inflated activity gets penalised. This is by design.
-      </p>
-    </Card>
-  );
-}
-
-function Row({ label, body }: { label: string; body: string }) {
-  return (
-    <div className="rounded-md border border-border p-3">
-      <span className="font-mono text-[10px] uppercase tracking-widest text-primary">{label}</span>
-      <p className="text-sm mt-1">{body}</p>
-    </div>
   );
 }
