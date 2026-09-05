@@ -7,7 +7,7 @@ import Welcome from "@/pages/Welcome";
 vi.mock("@/lib/eblocki/analytics", () => ({ logEvent: vi.fn() }));
 
 describe("first-use welcome", () => {
-  it("moves from a plain-language loop to an academic focus and the first artifact", () => {
+  it("configures arenas and behavioural targets before the first proof cycle", () => {
     render(
       <HelmetProvider>
         <MemoryRouter>
@@ -16,15 +16,23 @@ describe("first-use welcome", () => {
       </HelmetProvider>,
     );
 
-    expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: /Turn one piece of work/i })).toBeInTheDocument();
+    expect(screen.getByText("Step 1 of 5")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /life game that cannot lie/i })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
-    expect(screen.getByRole("heading", { name: /What kind of work/i })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Where do you want proof/i })).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: /Law/i }));
     fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
 
-    expect(screen.getByRole("heading", { name: /first useful result/i })).toBeInTheDocument();
-    expect(screen.getByText(/Start the correction and submit the stronger attempt/i)).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /What must the system help/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Reduce avoidance/i }));
+    fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
+
+    expect(screen.getByRole("heading", { name: /first result is a verdict/i })).toBeInTheDocument();
+    expect(screen.getByText(/Submit the stronger attempt/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /Continue/i }));
+
+    expect(screen.getByRole("heading", { name: /Progress feels like a game/i })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Start first quest/i })).toBeInTheDocument();
   });
 });
