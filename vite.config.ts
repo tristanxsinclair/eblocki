@@ -48,6 +48,13 @@ export default defineConfig(({ mode }) => {
   const suppliedBuildId = process.env.EBLOCKI_BUILD_ID?.trim() || process.env.VITE_BUILD_ID?.trim();
   const buildId = suppliedBuildId || (commitSha ? `${commitSha.slice(0, 12)}-${buildTimestamp.replace(/[-:.TZ]/g, "").slice(0, 14)}` : null);
   const environment = process.env.EBLOCKI_BUILD_ENV?.trim() || process.env.VITE_APP_ENV?.trim() || mode;
+  // @lovable.dev/mcp-js 0.20.x externalises Windows drive-letter entry paths
+  // as package imports, then replaces the committed Supabase function with an
+  // unresolved wrapper during a normal Vite build. Keep the generated,
+  // reviewed function stable on Windows. Linux CI/Lovable still regenerates it;
+  // Windows maintainers can opt in explicitly when validating an upstream fix.
+  const generateMcpFunction =
+    process.platform !== "win32" || process.env.EBLOCKI_FORCE_MCP_GENERATION === "true";
 
   return {
   define: {
@@ -63,7 +70,7 @@ export default defineConfig(({ mode }) => {
     host: "::",
     port: 8080,
   },
-  plugins: [react(), mcpPlugin()],
+  plugins: [react(), ...(generateMcpFunction ? [mcpPlugin()] : [])],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

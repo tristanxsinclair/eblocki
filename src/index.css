@@ -20,11 +20,12 @@ Brand direction (July 2026):
     /* Mobile shell dimensions — overwritten at runtime by AppShell / MobileBottomNav. */
     --app-header-h: 56px;
     --app-nav-h: 64px;
-    --background: 220 13% 5%;
-    --foreground: 210 20% 98%;
+    /* Sink Space family foundation: #071014 / #0b181e / #eef7f4 / #93aaa8. */
+    --background: 198 48% 5%;
+    --foreground: 160 36% 95%;
 
-    --card: 216 13% 8%;
-    --card-foreground: 210 20% 98%;
+    --card: 198 46% 8%;
+    --card-foreground: 160 36% 95%;
 
     --popover: 216 13% 8%;
     --popover-foreground: 210 20% 98%;
@@ -36,7 +37,12 @@ Brand direction (July 2026):
     --secondary-foreground: 210 20% 98%;
 
     --muted: 210 13% 13%;
-    --muted-foreground: 216 8% 66%;
+    --muted-foreground: 177 12% 62%;
+
+    /* Parent-studio accents stay supporting; Eblocki signal green remains primary. */
+    --studio-acid: 92 100% 68%;
+    --studio-cyan: 193 100% 66%;
+    --studio-blue: 229 100% 70%;
 
     --accent: 142 72% 56%;
     --accent-foreground: 220 20% 6%;
@@ -85,10 +91,10 @@ Brand direction (July 2026):
   }
 
   .dark {
-    --background: 220 13% 5%;
-    --foreground: 210 20% 98%;
-    --card: 216 13% 8%;
-    --card-foreground: 210 20% 98%;
+    --background: 198 48% 5%;
+    --foreground: 160 36% 95%;
+    --card: 198 46% 8%;
+    --card-foreground: 160 36% 95%;
     --popover: 216 13% 8%;
     --popover-foreground: 210 20% 98%;
 
@@ -97,7 +103,7 @@ Brand direction (July 2026):
     --secondary: 210 13% 13%;
     --secondary-foreground: 210 20% 98%;
     --muted: 210 13% 13%;
-    --muted-foreground: 216 8% 66%;
+    --muted-foreground: 177 12% 62%;
 
     --accent: 142 72% 56%;
     --accent-foreground: 220 20% 6%;
@@ -160,7 +166,8 @@ Brand direction (July 2026):
     background-image:
       linear-gradient(hsl(var(--border) / 0.18) 1px, transparent 1px),
       linear-gradient(90deg, hsl(var(--border) / 0.18) 1px, transparent 1px),
-      radial-gradient(circle at 76% 0%, hsl(var(--primary) / 0.055), transparent 34%);
+      radial-gradient(circle at 76% 0%, hsl(var(--studio-cyan) / 0.045), transparent 34%),
+      radial-gradient(circle at 16% 8%, hsl(var(--primary) / 0.035), transparent 28%);
     background-size: 64px 64px, 64px 64px, auto;
   }
   .operator-chrome {

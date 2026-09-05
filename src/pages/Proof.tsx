@@ -260,6 +260,7 @@ export default function Proof() {
   const questSource = params.get("source") === "quest";
   const objectiveIdHint = trustedRecordHint(params.get("objective"));
   const [firstProofSubmitted, setFirstProofSubmitted] = useState(false);
+  const [correctionAttempt, setCorrectionAttempt] = useState(false);
 
   const [pending, setPending] = useState<ProofCommitmentRow[]>([]);
   const [completed, setCompleted] = useState<ProofArtifactRow[]>([]);
@@ -476,6 +477,12 @@ export default function Proof() {
     setSubmitting(true);
     setVerdict(null);
     setSubmittedStudyClassification(null);
+    if (firstProofMode) {
+      void logEvent("activation_artifact_submission_started", {
+        route: "/proof",
+        source: correctionAttempt ? "correction" : "first_proof",
+      });
+    }
     try {
       const modeId =
         selectedMode?.mode_id ??
@@ -704,6 +711,19 @@ export default function Proof() {
           route: "/proof",
           verdictStrength: score.evidenceStrength,
         });
+        void logEvent("activation_artifact_submitted", {
+          route: "/proof",
+          source: correctionAttempt ? "correction" : "first_proof",
+          verdictStrength: score.evidenceStrength,
+        });
+        if (correctionAttempt) {
+          void logEvent("activation_second_attempt_submitted", {
+            route: "/proof",
+            source: "correction",
+            verdictStrength: score.evidenceStrength,
+          });
+          setCorrectionAttempt(false);
+        }
       }
       resetForm();
       reload();
@@ -1717,6 +1737,12 @@ export default function Proof() {
                 }
                 setTitle(verdict.title ? `Corrected attempt: ${verdict.title}` : "");
                 setNextUpgrade(presentation.correction?.action ?? "");
+                setCorrectionAttempt(true);
+                void logEvent("activation_correction_started", {
+                  route: "/proof",
+                  source: firstProofMode ? "first_proof" : "proof",
+                  destination: presentation.correctedAttemptHref,
+                });
                 void logEvent(firstProofMode ? "activation_verdict_cta_clicked" : "proof_verdict_cta_clicked", {
                   route: "/proof",
                   source: firstProofMode ? "first_proof" : "proof",
@@ -1731,6 +1757,7 @@ export default function Proof() {
                 setVerdict(null);
                 setSubmittedStudyClassification(null);
                 setDetailOpen(false);
+                setCorrectionAttempt(false);
               }}
             />
             {verdict.attachmentUrl && (
@@ -1894,7 +1921,7 @@ function ProofVerdictSummaryCard({
         <div className="min-w-0">
           <div className="flex items-center gap-2">
             <CheckCircle2 className="h-4 w-4 text-primary shrink-0" />
-            <span className="font-mono text-[10px] uppercase tracking-widest text-primary">What this proves</span>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-primary">Verdict · inferred from your work</span>
           </div>
           <h2 id="proof-result-heading" className="mt-2 text-lg font-semibold leading-snug break-words">
             {presentation.verdict.headline}
@@ -1914,7 +1941,7 @@ function ProofVerdictSummaryCard({
       </div>
       <div className="mt-3 grid gap-3 md:grid-cols-2">
         <section className="rounded-sm border border-border bg-background/50 p-4 min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-primary">The main gap</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-primary">Most important gap · inferred</div>
           {presentation.gap ? (
             <>
               <h3 className="mt-2 text-base font-semibold leading-snug break-words">{presentation.gap.label}</h3>
@@ -1924,12 +1951,12 @@ function ProofVerdictSummaryCard({
             </>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground leading-5 break-words">
-              A specific improvement gap was not identified for this artifact.
+              Needs more evidence: a specific improvement gap was not identified for this artifact.
             </p>
           )}
         </section>
         <section className="rounded-sm border border-primary/30 bg-background/50 p-4 min-w-0">
-          <div className="font-mono text-[10px] uppercase tracking-widest text-primary">What to do next</div>
+          <div className="font-mono text-[10px] uppercase tracking-widest text-primary">Next correction · recommended</div>
           {presentation.correction ? (
             <>
               <p className="mt-2 text-base font-medium leading-6 break-words">{presentation.correction.action}</p>
@@ -1946,7 +1973,7 @@ function ProofVerdictSummaryCard({
             </>
           ) : (
             <p className="mt-2 text-sm text-muted-foreground leading-5 break-words">
-              The evidence was not detailed enough to identify the next correction. Submit a more specific artifact to receive targeted feedback.
+              Needs more evidence: submit a more specific artifact to receive a targeted correction.
             </p>
           )}
         </section>
@@ -2040,7 +2067,7 @@ function ProofVerdictDetails({
       </summary>
       <div className="mt-3 grid gap-3 text-sm">
         <VerdictRow label="Why it scored that way" value={verdict.why} />
-        <VerdictRow label="What counted" value={verdict.feedback} />
+        <VerdictRow label="Observed in the submission" value={verdict.feedback} />
         <VerdictRow
           label={firstProofMode ? "What was weak or missing" : "Missing standard"}
           value={verdict.evidenceStrength === "elite" ? "Nothing major - this meets the selected standard." : verdict.missingStandard}
