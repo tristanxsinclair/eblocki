@@ -49,6 +49,20 @@ describe("LifeGameHud", () => {
     expect(container.querySelectorAll("a button, button a")).toHaveLength(0);
   });
 
+  it("offers a persistent focus mode without changing evidence data", () => {
+    renderHud();
+
+    const focus = screen.getByRole("button", { name: "Focus" });
+    expect(focus).toHaveAttribute("aria-pressed", "false");
+
+    fireEvent.click(focus);
+
+    expect(screen.getByRole("button", { name: "Overview" })).toHaveAttribute("aria-pressed", "true");
+    expect(sessionStorage.getItem("eblocki-demo-focus-mode")).toBe("1");
+    expect(screen.getByRole("heading", { name: "Compound Operator" })).toBeInTheDocument();
+    expect(screen.getByText("Court Verified")).toBeInTheDocument();
+  });
+
   it("shows the personalised Quest Director and filters the Run Log without changing truth", () => {
     renderHud();
 
