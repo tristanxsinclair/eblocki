@@ -7,6 +7,7 @@ import {
   type DashboardProofRow,
 } from "@/lib/eblocki/dashboard-view-model";
 import { verdictIdentityImpact } from "@/lib/eblocki/verdict-identity-impact";
+import { shouldOpenWelcome } from "@/lib/eblocki/first-proof";
 
 function renderProtocol(latestEvidenceStrength: string | null | undefined) {
   const view = buildDashboardViewModel({});
@@ -58,5 +59,16 @@ describe("Dashboard daily evidence protocol", () => {
     renderProtocol(null);
 
     expect(screen.queryByTestId("dashboard-verdict-identity-impact")).not.toBeInTheDocument();
+  });
+});
+
+describe("Dashboard welcome compatibility", () => {
+  it("keeps legacy users who completed onboarding on their dashboard", () => {
+    expect(shouldOpenWelcome({ seen_welcome: false, completed_onboarding: true })).toBe(false);
+  });
+
+  it("opens welcome only for users with no completed introduction", () => {
+    expect(shouldOpenWelcome({ seen_welcome: false, completed_onboarding: false })).toBe(true);
+    expect(shouldOpenWelcome(null)).toBe(true);
   });
 });
